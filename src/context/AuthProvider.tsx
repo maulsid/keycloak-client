@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import keycloak from '../keycloak';
+import keycloak from '../config/keycloak';
 
 let isKeycloakInitialized = false;
 
@@ -28,6 +28,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         })
         .then((authenticated) => {
           setIsAuthenticated(authenticated);
+          localStorage.setItem("token",keycloak.token|| '')
           setToken(keycloak.token || null);
         })
         .catch((err) => {
