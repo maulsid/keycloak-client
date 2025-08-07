@@ -4,19 +4,28 @@ import Public from '../components/public/Public';
 import LoggedOut from '../pages/logout/LoggedOut';
 import NotFound from '../pages/notFound/NotFound';
 import DashboardPage from '../pages/dashboard/DashbaordPage';
+import Home from '../pages/home/Home';
+import AppLayout from '../layout/AppLaylout';
 
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<Public />} />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <DashboardPage />
-          </ProtectedRoute>
-        }
-      />
+      <Route element={<AppLayout />}>
+        <Route element={<ProtectedRoute />}>
+
+          <Route
+            path="/dashboard"
+            element={
+
+              <DashboardPage />
+
+            }
+          />
+          <Route path='/' element={<Home />} />
+
+        </Route>
+      </Route>
+      <Route path="/login" element={<Public />} />
       <Route path="/logged-out" element={<LoggedOut />} />
       <Route path="*" element={<NotFound />} />
     </Routes>

@@ -1,7 +1,8 @@
-import { useAuth } from '../../context/AuthProvider';
+import { useAppDispatch } from "../../redux/redux-hooks";
+import { loginUser } from "../../redux/slices/authSlice";
 
 const Public = () => {
-  const { login } = useAuth();
+  const dispatch = useAppDispatch();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -9,7 +10,7 @@ const Public = () => {
         <h1 className="text-2xl font-bold mb-4 text-center">Welcome</h1>
         <p className="text-gray-600 mb-6 text-center">Please login to access the dashboard</p>
         <button
-          onClick={login}
+          onClick={() => dispatch(loginUser())}
           className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-200"
         >
           Login

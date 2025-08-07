@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthProvider';
+import { useAppDispatch } from '../../redux/redux-hooks';
+import { logoutUser } from '../../redux/slices/authSlice';
 
 const Header = () => {
-  const { logout } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const dispatch = useAppDispatch();
 
   const toggleProfileMenu = () => {
     setIsProfileOpen(!isProfileOpen);
@@ -13,12 +14,8 @@ const Header = () => {
   return (
     <nav className="bg-white shadow-md p-4 flex justify-between items-center">
       <div className="flex space-x-6">
-        <Link to="/dashboard" className="text-gray-700 hover:text-blue-600 font-medium">
-          Home
-        </Link>
-        <Link to="#" className="text-gray-700 hover:text-blue-600 font-medium">
-          Profile
-        </Link>
+        <Link to="/" className="text-gray-700 hover:text-blue-600 font-medium">Home</Link>
+        <Link to="/dashboard" className="text-gray-700 hover:text-blue-600 font-medium">Dashboard</Link>
       </div>
       <div className="relative flex items-center space-x-4">
         <div
@@ -31,7 +28,7 @@ const Header = () => {
           <div className="absolute right-0 top-10 bg-white shadow-lg rounded-lg p-2 w-40 z-10">
             <button
               onClick={() => {
-                logout();
+                dispatch(logoutUser());
                 setIsProfileOpen(false);
               }}
               className="w-full text-left text-red-500 hover:bg-gray-100 px-4 py-2 rounded"

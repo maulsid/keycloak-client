@@ -102,12 +102,12 @@ const Dashboard = () => {
                       </span>
                     </td>
                     <td className="p-3">{code.order_id || 'N/A'}</td>
-                    <td className="p-3">
+                    {/* <td className="p-3">
                       <div className="flex space-x-2">
                         <button className="text-gray-500 hover:text-blue-500">📋</button>
                         <button className="text-gray-500 hover:text-blue-500">✏️</button>
                       </div>
-                    </td>
+                    </td> */}
                   </tr>
                 ))}
               </tbody>
