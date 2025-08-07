@@ -13,11 +13,11 @@ const Header = () => {
   return (
     <nav className="bg-white shadow-md p-4 flex justify-between items-center">
       <div className="flex space-x-6">
-        <Link to="/dashboard" className="text-gray-700 hover:text-blue-600 font-medium">
+        <Link to="/home" className="text-gray-700 hover:text-blue-600 font-medium">
           Home
         </Link>
-        <Link to="#" className="text-gray-700 hover:text-blue-600 font-medium">
-          Profile
+        <Link to="/dashboard" className="text-gray-700 hover:text-blue-600 font-medium">
+          Dashboard
         </Link>
       </div>
       <div className="relative flex items-center space-x-4">
