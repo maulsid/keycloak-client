@@ -13,28 +13,96 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [token, setToken] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token')); // Initialize based on token presence
+  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
 
   useEffect(() => {
-    if (window.location.pathname === '/logged-out') return;
-
-    if (!isKeycloakInitialized) {
-      isKeycloakInitialized = true;
-
-      keycloak
-        .init({
-          onLoad: 'check-sso',
-        })
-        .then((authenticated) => {
-          setIsAuthenticated(authenticated);
-          localStorage.setItem("token",keycloak.token|| '')
-          setToken(keycloak.token || null);
-        })
-        .catch((err) => {
-          console.error('Keycloak init failed:', err);
-        });
+    if (window.location.pathname === '/logged-out') {
+      localStorage.removeItem('token');
+      setIsAuthenticated(false);
+      setToken(null);
+      return;
     }
+
+    const initKeycloak = async () => {
+      try {
+        if (!isKeycloakInitialized) {
+          isKeycloakInitialized = true;
+          const authenticated = await keycloak.init({ 
+            onLoad: 'check-sso',
+            checkLoginIframe: false,
+            token: localStorage.getItem('token') || undefined, // Pass stored token to Keycloak
+          });
+          setIsAuthenticated(authenticated);
+          setToken(keycloak.token || null);
+          if (authenticated && keycloak.token) {
+            localStorage.setItem('token', keycloak.token);
+          } else {
+            localStorage.removeItem('token');
+          }
+        }
+
+        keycloak.onAuthSuccess = () => {
+          setIsAuthenticated(true);
+          setToken(keycloak.token || null);
+          if (keycloak.token) {
+            localStorage.setItem('token', keycloak.token);
+          }
+        };
+
+        keycloak.onAuthRefreshSuccess = () => {
+          setToken(keycloak.token || null);
+          if (keycloak.token) {
+            localStorage.setItem('token', keycloak.token);
+          }
+        };
+
+        keycloak.onAuthError = (err) => {
+          console.error('Keycloak auth error:', err);
+          setIsAuthenticated(false);
+          setToken(null);
+          localStorage.removeItem('token');
+        };
+
+        keycloak.onAuthLogout = () => {
+          setIsAuthenticated(false);
+          setToken(null);
+          localStorage.removeItem('token');
+        };
+
+        // Validate token periodically
+        keycloak.onTokenExpired = () => {
+          keycloak.updateToken(30).catch((err) => {
+            console.error('Token refresh failed:', err);
+            setIsAuthenticated(false);
+            setToken(null);
+            localStorage.removeItem('token');
+          });
+        };
+      } catch (err) {
+        console.error('Keycloak init failed:', err);
+        setIsAuthenticated(false);
+        setToken(null);
+        localStorage.removeItem('token');
+      }
+    };
+
+    initKeycloak();
+
+    // Optional: Periodic token validation
+    const interval = setInterval(() => {
+      if (keycloak.authenticated && keycloak.token) {
+        setIsAuthenticated(true);
+        setToken(keycloak.token);
+        localStorage.setItem('token', keycloak.token);
+      } else {
+        setIsAuthenticated(false);
+        setToken(null);
+        localStorage.removeItem('token');
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const login = () => {
@@ -42,7 +110,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const logout = () => {
-    keycloak.logout({ redirectUri: window.location.origin });
+    setIsAuthenticated(false);
+    setToken(null);
+    localStorage.removeItem('token');
+    keycloak.logout({ redirectUri: window.location.origin + '/logged-out' });
   };
 
   return (

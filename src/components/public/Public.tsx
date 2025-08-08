@@ -1,7 +1,16 @@
 import { useAuth } from '../../context/AuthProvider';
+import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 const Public = () => {
-  const { login } = useAuth();
+  const { isAuthenticated, login } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
