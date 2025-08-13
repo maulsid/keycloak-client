@@ -1,45 +1,46 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthProvider';
-import Public from '../components/public/Public';
-import LoggedOut from '../pages/logout/LoggedOut';
+import { Routes, Route } from 'react-router-dom';
 import NotFound from '../pages/notFound/NotFound';
-import ProtectedRoute from '../components/protected/Protected';
-import Home from '../pages/home/Home';
-import AppLayout from '../layout/AppLayout';
-import DashboardPage from '../pages/dashboard/DashbaordPage';
+import ProtectedRoute from '../components/protected/Protected';;
+import Login from '../pages/login/Login';
+import AdminDashboard from '../pages/admin/AdminDashbaord';
+import AccessCodes from '../pages/accessCode/AccessCode';
+import CustomerDashboard from '../pages/customer/CustomerDashbaord';
 
 const AppRoutes = () => {
-  const { isAuthenticated } = useAuth();
 
   return (
     <Routes>
-      {/* Public routes without layout */}
+      <Route path="/login" element={<Login />} />
       <Route
         path="/"
-        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Public />}
+        element={<Login />}
       />
-      <Route path="/logged-out" element={<LoggedOut />} />
       <Route path="*" element={<NotFound />} />
+      <Route
+        path="/admin/dashboard"
+        element={
+          <ProtectedRoute>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/customer/access-codes"
+        element={
+          <ProtectedRoute>
+            <AccessCodes />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/customer/dashboard"
+        element={
+          <ProtectedRoute>
+            <CustomerDashboard />
+          </ProtectedRoute>
+        }
+      />
 
-      {/* Protected routes wrapped in AppLayout */}
-      <Route element={<AppLayout />}>
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <DashboardPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/home"
-          element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          }
-        />
-      </Route>
     </Routes>
   );
 };

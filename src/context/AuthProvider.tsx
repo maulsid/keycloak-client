@@ -106,14 +106,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const login = () => {
-    keycloak.login({ redirectUri: window.location.origin + '/dashboard' });
+    keycloak.login({ redirectUri: window.location.origin + '/admin/dashboard' });
   };
 
   const logout = () => {
     setIsAuthenticated(false);
     setToken(null);
     localStorage.removeItem('token');
-    keycloak.logout({ redirectUri: window.location.origin + '/logged-out' });
+    keycloak.logout({ redirectUri: window.location.origin + '/login' });
   };
 
   return (
