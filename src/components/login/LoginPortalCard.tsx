@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthProvider";
+import { useAuth } from "../../context/CognitoAuth";
 import type { LoginPortalCardProps } from "../../types";
 import LoginFeatureCard from "./LoginFeatureCard";
 import { useEffect } from "react";

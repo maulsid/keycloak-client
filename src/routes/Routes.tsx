@@ -5,6 +5,7 @@ import Login from '../pages/login/Login';
 import AdminDashboard from '../pages/admin/AdminDashbaord';
 import AccessCodes from '../pages/accessCode/AccessCode';
 import CustomerDashboard from '../pages/customer/CustomerDashbaord';
+import Callback from '../pages/callback/Callback';
 
 const AppRoutes = () => {
 
@@ -15,6 +16,8 @@ const AppRoutes = () => {
         path="/"
         element={<Login />}
       />
+      <Route path="/callback" element={<Callback />} />
+
       <Route path="*" element={<NotFound />} />
       <Route
         path="/admin/dashboard"

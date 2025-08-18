@@ -6,6 +6,7 @@ import AdimnAlertBanner from '../../components/admin/AdminAlertBanner';
 import AdminActivityItem from '../../components/admin/AdminActivityItem';
 import { actionCards, statCards } from '../../utils/data/AdminDashboardData';
 import Header from '../../components/common/Header';
+
 // Main AdminDashboard Component
 const AdminDashboard: React.FC = () => {
   const [adminData, setAdminData] = useState<AdminData | null>(null);
