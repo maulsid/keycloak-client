@@ -418,7 +418,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setIdToken(null);
     const logoutUrl = `${COGNITO_CONFIG.cognitoDomain}/logout?client_id=${
       COGNITO_CONFIG.clientId
-    }&response_type=code&redirect_uri=${COGNITO_CONFIG.logoutRedirectUri}`;
+    }&logout_uri=${COGNITO_CONFIG.logoutRedirectUri}`;    
     window.location.href = logoutUrl;
   };
 

@@ -6,6 +6,8 @@ import AdimnAlertBanner from '../../components/admin/AdminAlertBanner';
 import AdminActivityItem from '../../components/admin/AdminActivityItem';
 import { actionCards, statCards } from '../../utils/data/AdminDashboardData';
 import Header from '../../components/common/Header';
+import { Loading } from '../../components/common/Loading';
+import { Error } from '../../components/common/Error';
 
 // Main AdminDashboard Component
 const AdminDashboard: React.FC = () => {
@@ -43,26 +45,12 @@ const AdminDashboard: React.FC = () => {
 
     fetchAdminData();
   }, []);
-
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading dashboard...</p>
-        </div>
-      </div>
-    );
+    return <Loading />;
   }
 
   if (error || !adminData) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600">{error || 'Failed to load dashboard'}</p>
-        </div>
-      </div>
-    );
+    return <Error message={error || 'Failed to load admin dashboard'} />;
   }
 
   return (

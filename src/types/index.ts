@@ -165,4 +165,25 @@ export interface CommonHeaderProps {
   showBackButton?: boolean;
   showActionButtons?: boolean;
   isSettings?: boolean;
+  isAddCustomer?: boolean;
+  backLink?: string;
+}
+
+export interface Customer {
+  id: string;
+  name: string;
+  primaryContact: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  status: 'active' | 'pending' | 'inactive';
+  invitationStatus: 'registered' | 'pending' | 'expired';
+  totalCodes: number;
+  utilizedCodes: number;
+  availableCodes: number;
+  registrationDate: string;
+  lastLogin: string | null;
 }

@@ -9,6 +9,8 @@ const Header: React.FC<CommonHeaderProps> = ({
   showBackButton = false,
   showActionButtons = false,
   isSettings=false,
+  isAddCustomer=false,
+  backLink='/customer/dashboard',
 }) => {
   const { logout } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -24,7 +26,7 @@ const Header: React.FC<CommonHeaderProps> = ({
           <div className="flex items-center">
             {showBackButton && (
               <Link
-                to="/customer/dashboard"
+                to={backLink}
                 className="mr-4 text-gray-400 hover:text-gray-600"
               >
                 <svg
@@ -97,6 +99,11 @@ const Header: React.FC<CommonHeaderProps> = ({
                 </Link>
               </div>
             )}
+            {isAddCustomer &&
+               <Link to="/admin/create-customer" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+              Add Customer
+            </Link>
+            }
             {isSettings && <div className="relative">
               <button
                 className="text-gray-400 hover:text-gray-600"

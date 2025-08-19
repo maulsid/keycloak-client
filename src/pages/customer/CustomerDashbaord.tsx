@@ -6,6 +6,8 @@ import CustomerActionCard from '../../components/customer/CustomerActionCard';
 import CustomerActivityItem from '../../components/customer/CustomerActivityItem';
 import { actionCards, statCards } from '../../utils/data/CutomerDashbaordData';
 import Header from '../../components/common/Header';
+import { Loading } from '../../components/common/Loading';
+import { Error } from '../../components/common/Error';
 
 // Define user outside the component to ensure a stable reference
 const user = {
@@ -60,24 +62,11 @@ const CustomerDashboard: React.FC = () => {
   }, []); // Empty dependency array since user is static
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading dashboard...</p>
-        </div>
-      </div>
-    );
+    return <Loading />;
   }
 
   if (error || !customerData) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600">{error || 'Failed to load dashboard'}</p>
-        </div>
-      </div>
-    );
+    return <Error message={error || 'Failed to load customer dashboard'} />;
   }
 
   return (

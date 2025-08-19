@@ -5,6 +5,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/CognitoAuth";
 import { useEffect } from "react";
+import { Loading } from "../../components/common/Loading";
 
 // Interface for JWT payload
 interface IdTokenPayload {
@@ -49,7 +50,7 @@ const decodeJwt = (token: string): IdTokenPayload | null => {
 
 //         const payload = decodeJwt(accessToken);
 //         console.log('aaa', payload);
-        
+
 //         if (!payload) {
 //           console.error('Invalid id_token');
 //           // navigate('/login');
@@ -85,7 +86,7 @@ const decodeJwt = (token: string): IdTokenPayload | null => {
 
 
 // Callback component
- const Callback: React.FC = () => {
+const Callback: React.FC = () => {
   const { isAuthenticated, idToken } = useAuth();
   const navigate = useNavigate();
 
@@ -94,15 +95,15 @@ const decodeJwt = (token: string): IdTokenPayload | null => {
       if (isAuthenticated && idToken) {
         const payload = decodeJwt(idToken);
         console.log('aaa', payload);
-        
+
         if (!payload) {
           console.error('Invalid id_token');
           return;
         }
 
         const role = payload['custom:role'] || '';
-        console.log("role",role);
-        
+        console.log("role", role);
+
         if (role.includes('admin')) {
           navigate('/admin/dashboard');
         } else if (role.includes('customer')) {
@@ -118,12 +119,7 @@ const decodeJwt = (token: string): IdTokenPayload | null => {
   }, [isAuthenticated, idToken, navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-6 rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold">Processing login...</h1>
-        <p>Please wait while we authenticate your session.</p>
-      </div>
-    </div>
+    <Loading />
   );
 };
 
