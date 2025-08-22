@@ -8,6 +8,7 @@ import { actionCards, statCards } from '../../utils/data/CutomerDashbaordData';
 import Header from '../../components/common/Header';
 import { Loading } from '../../components/common/Loading';
 import { Error } from '../../components/common/Error';
+import CustomerFooter from '../../components/customer/CustomerFooter';
 
 // Define user outside the component to ensure a stable reference
 const user = {
@@ -70,17 +71,18 @@ const CustomerDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Header title="Rejoyn Portal" primaryContact={customerData.primaryContact} isSettings />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           {statCards.map((card, index) => (
             <CustomerStatCard
               key={index}
               title={card.title}
               value={card.value(customerData)} // Resolve value function
-              icon={<card.icon />}
+              // @ts-ignore              
+              icon={card.icon}
               iconColor={card.iconColor}
             />
           ))}
@@ -93,7 +95,8 @@ const CustomerDashboard: React.FC = () => {
               title={card.title}
               description={card.description}
               link={card.link}
-              icon={<card.icon />}
+              // @ts-ignore
+              icon={card.icon}
               iconColor={card.iconColor}
             />
           ))}
@@ -116,6 +119,7 @@ const CustomerDashboard: React.FC = () => {
           </div>
         </div>
       </div>
+      <CustomerFooter />
     </div>
   );
 };

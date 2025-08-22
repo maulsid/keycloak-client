@@ -15,11 +15,11 @@ const AppRoutes = () => {
       <Route path="/" element={<Login />} />
       <Route path="/callback" element={<Callback />} />
       <Route path="*" element={<NotFound />} />
-      <Route path='/admin/customers' element={<AdminCustomers />} />
+      <Route path="/customer/dashboard" element={<CustomerDashboard />} />
+      <Route path="/customer/access-codes" element={<AccessCodes />} />
       <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/customer/access-codes" element={<AccessCodes />} />
-        <Route path="/customer/dashboard" element={<CustomerDashboard />} />
+        <Route path='/admin/customers' element={<AdminCustomers />} />
       </Route>
     </Routes>
   );

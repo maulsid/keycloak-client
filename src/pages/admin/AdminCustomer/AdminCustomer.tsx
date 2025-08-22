@@ -5,10 +5,10 @@ import { Error } from '../../../components/common/Error';
 import Header from '../../../components/common/Header';
 import type { Customer } from '../../../types';
 import { CustomerCards } from '../../../components/admin/customer/CustomerCards';
-import { SearchFilter } from '../../../components/admin/customer/SerchFilter';
 import { CustomerTable } from '../../../components/admin/customer/CustomerTable';
 import { CustomerManagementInfo } from '../../../components/admin/customer/CustomerManagementInfo';
 import { customerData } from '../../../utils/data/AdminCustomer';
+import { SearchFilter } from '../../../components/admin/customer/SerchFilter';
 
 export default function AdminCustomers() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -35,21 +35,21 @@ export default function AdminCustomers() {
   }, []);
 
   const filteredCustomers = customers.filter((customer: Customer) => {
+    const searchLower = searchTerm.toLowerCase();
     const matchesSearch =
-      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.primaryContact.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || customer.status === statusFilter;
+      (customer.name?.toLowerCase() || '').includes(searchLower) ||
+      (customer.primaryContact?.toLowerCase() || '').includes(searchLower) ||
+      (customer.id?.toString().toLowerCase() || '').includes(searchLower);
+    const matchesStatus = statusFilter === 'all' || (customer.status?.toLowerCase() === statusFilter.toLowerCase());
     return matchesSearch && matchesStatus;
   });
-
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       active: { color: 'bg-green-100 text-green-800', text: 'Active' },
       pending: { color: 'bg-yellow-100 text-yellow-800', text: 'Pending' },
       inactive: { color: 'bg-gray-100 text-gray-800', text: 'Inactive' },
     };
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.inactive;
+    const config = statusConfig[status?.toLowerCase() as keyof typeof statusConfig] || statusConfig.inactive;
     return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>{config.text}</span>;
   };
 
@@ -59,8 +59,16 @@ export default function AdminCustomers() {
       pending: { color: 'bg-yellow-100 text-yellow-800', text: 'Pending' },
       expired: { color: 'bg-red-100 text-red-800', text: 'Expired' },
     };
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
+    const config = statusConfig[status?.toLowerCase() as keyof typeof statusConfig] || statusConfig.pending;
     return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>{config.text}</span>;
+  };
+
+  const handleView = (customerId: string) => {
+    navigate(`/admin/customers/${customerId}`);
+  };
+
+  const handleEdit = (customerId: string) => {
+    navigate(`/admin/customers/edit/${customerId}`);
   };
 
   if (loading) {
@@ -86,6 +94,8 @@ export default function AdminCustomers() {
           customers={filteredCustomers}
           getStatusBadge={getStatusBadge}
           getInvitationStatusBadge={getInvitationStatusBadge}
+          onView={handleView}
+          onEdit={handleEdit}
         />
         {filteredCustomers.length === 0 && (
           <div className="text-center py-12">
