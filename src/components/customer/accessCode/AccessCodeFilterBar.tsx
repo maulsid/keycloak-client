@@ -29,7 +29,7 @@ const AceesCodeFilterBar: React.FC<AccessCodeFilterBarProps> = ({ searchTerm, se
             className="border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="all">All Status</option>
-            <option value="available">Available</option>
+            <option value="assigned">Available</option>
             <option value="utilized">Utilized</option>
           </select>
         </div>

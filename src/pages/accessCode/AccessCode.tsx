@@ -6,26 +6,32 @@ import {
   setStatusFilter,
   setCurrentPage,
 } from '../../redux/slices/codeSlice';
-import { Link } from 'react-router-dom';
 import AceesCodeFilterBar from '../../components/customer/accessCode/AccessCodeFilterBar';
 import AccessCodeStatCard from '../../components/customer/accessCode/AccessCodeStatCard';
 import AccessCodeEmptyState from '../../components/customer/accessCode/AccessCodeEmptyState';
 import AccessCodeRow from '../../components/customer/accessCode/AccessCodeRow';
 import type { AccessCode } from '../../types';
 import Header from '../../components/common/Header';
+import { Loading } from '../../components/common/Loading';
+import { Error } from '../../components/common/Error';
+import { useAuth } from '../../context/CognitoAuth';
 
 const AccessCodes: React.FC = () => {
   const dispatch = useAppDispatch();
   const { filteredCodes, searchTerm, statusFilter, currentPage, itemsPerPage, loading, error } = useAppSelector(
     (state) => state.codes
   );
-  const user = { id: 'user123' }; // Mock user for demonstration
-
-  // useEffect(() => {
-  //   if (user) {
-  //     dispatch(fetchCodesThunk());
-  //   }
-  // }, []);
+    const { token } = useAuth();
+  useEffect(() => {
+    if (token) {
+      dispatch(fetchCodesThunk(token) as any);
+    } else {
+      dispatch({
+        type: 'codes/fetchCodes/rejected',
+        payload: 'No authentication token available',
+      });
+    }
+  }, [dispatch, token]);
 
   // Map filteredCodes to match AccessCode type expected by components
   const mappedCodes: AccessCode[] = filteredCodes.map((code) => ({
@@ -48,41 +54,15 @@ const AccessCodes: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading access codes...</p>
-        </div>
-      </div>
+      <Loading />
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <svg className="h-12 w-12 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Access Codes</h2>
-          <p className="text-gray-600">{error}</p>
-        </div>
-      </div>
+      <Error message='An error occurred while fetching access codes. Please try again later.' />
     );
   }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600">
-            Please <Link to="/login" className="underline">log in</Link> to view access codes.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   const statCards = [
     {
       title: 'Total Codes',

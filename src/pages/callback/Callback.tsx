@@ -1,7 +1,3 @@
-// import React, { useEffect } from 'react';
-// import { useNavigate } from 'react-router-dom';
-// import { useAuth } from '../../context/CognitoAuth';
-
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/CognitoAuth";
 import { useEffect } from "react";
@@ -9,7 +5,7 @@ import { Loading } from "../../components/common/Loading";
 
 // Interface for JWT payload
 interface IdTokenPayload {
-  'custom:role'?: string;
+  'role'?: string;
   sub: string;
   email?: string;
 }
@@ -32,76 +28,21 @@ const decodeJwt = (token: string): IdTokenPayload | null => {
   }
 };
 
-//for local storage remove below commented code
-
-// const Callback: React.FC = () => {
-//   const { isAuthenticated, token } = useAuth();
-//   const navigate = useNavigate();
-
-//   useEffect(() => {
-//     const handleCallback = async () => {
-//       if (isAuthenticated ) {
-//         const accessToken = localStorage.getItem('access_token');
-//         if (!accessToken) {
-//           console.error('No id_token found');
-//           // navigate('/login');
-//           return;
-//         }
-
-//         const payload = decodeJwt(accessToken);
-//         console.log('aaa', payload);
-
-//         if (!payload) {
-//           console.error('Invalid id_token');
-//           // navigate('/login');
-//           return;
-//         }
-
-//         const role = payload['custom:role'] || '';
-//         if (role.includes('admin')) {
-//           navigate('/admin/dashboard');
-//         } else if (role.includes('customer')) {
-//           navigate('/customer/dashboard');
-//         } else {
-//           console.error('User has no recognized role');
-//           navigate('/login');
-//         }
-//       } 
-//     };
-
-//     handleCallback();
-//   }, [isAuthenticated, token, navigate]);
-
-//   return (
-//     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-//       <div className="bg-white p-6 rounded-lg shadow-lg">
-//         <h1 className="text-2xl font-bold">Processing login...</h1>
-//         <p>Please wait while we authenticate your session.</p>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Callback;
-
-
 // Callback component
 const Callback: React.FC = () => {
-  const { isAuthenticated, idToken } = useAuth();
+  const { isAuthenticated,token } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     const handleCallback = async () => {
-      if (isAuthenticated && idToken) {
-        const payload = decodeJwt(idToken);
-        console.log('aaa', payload);
-
+      if (isAuthenticated  && token) {
+        const payload = decodeJwt(token);
         if (!payload) {
           console.error('Invalid id_token');
           return;
         }
 
-        const role = payload['custom:role'] || '';
+        const role = payload['role'] || '';
         console.log("role", role);
 
         if (role.includes('admin')) {
@@ -116,7 +57,7 @@ const Callback: React.FC = () => {
     };
 
     handleCallback();
-  }, [isAuthenticated, idToken, navigate]);
+  }, [isAuthenticated, token, navigate]);
 
   return (
     <Loading />

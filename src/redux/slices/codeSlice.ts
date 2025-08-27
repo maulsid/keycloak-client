@@ -51,12 +51,14 @@ const fallbackCodes: Code[] = [
   },
 ];
 
-export const fetchCodesThunk = createAsyncThunk<Code[], void, { rejectValue: string }>(
+export const fetchCodesThunk = createAsyncThunk<Code[], string | null, { rejectValue: string }>(
   'codes/fetchCodes',
-  async (_, { rejectWithValue }) => {
+  async (token, { rejectWithValue }) => {
     try {
-      return await fetchCodes();
+      const data = await fetchCodes(token);
+      return data;
     } catch (error) {
+      console.error('Error in fetchCodesThunk:', error); // Fix typo
       if (error instanceof Error) {
         return rejectWithValue(error.message);
       }

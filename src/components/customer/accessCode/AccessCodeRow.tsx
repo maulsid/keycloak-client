@@ -35,7 +35,7 @@ const AccessCodeRow: React.FC<AccessCodeRowProps> = ({ code }) => (
       <div className="text-sm text-gray-900">{code.assignedDate || '-'}</div>
     </td>
     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-      {code.status === 'available' && (
+      {code.status === 'assigned' && (
         <Link
           to={`/customer/assign-code?code=${code.code}`}
           className="text-cyan-500 hover:text-cyan-600 font-medium"

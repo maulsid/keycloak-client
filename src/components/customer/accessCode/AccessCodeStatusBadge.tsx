@@ -4,11 +4,11 @@ import type { AccessCodeStatusBadgeProps } from "../../../types";
 const AccessCodeStatusBadge: React.FC<AccessCodeStatusBadgeProps> = ({ status }) => (
   <span
     className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-      status === 'utilized' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+      status === 'assigned' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
     }`}
   >
     <svg
-      className={`h-3 w-3 mr-1 ${status === 'utilized' ? 'text-green-500' : 'text-gray-500'}`}
+      className={`h-3 w-3 mr-1 ${status === 'assigned' ? 'text-green-500' : 'text-gray-500'}`}
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"

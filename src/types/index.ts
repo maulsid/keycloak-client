@@ -170,20 +170,16 @@ export interface CommonHeaderProps {
 }
 
 export interface Customer {
-  id: string;
+  customer_id: number;
   name: string;
-  primaryContact: string;
-  email: string;
-  phone: string;
-  address: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  status: 'active' | 'pending' | 'inactive';
-  invitationStatus: 'registered' | 'pending' | 'expired';
-  totalCodes: number;
-  utilizedCodes: number;
-  availableCodes: number;
-  registrationDate: string;
-  lastLogin: string | null;
+  customer_type: string;
+  organization_id: number | null;
+  organization_name: string | null;
+  total_codes_ordered: number;
+  codes_utilized: number;
+  codes_available: number;
+  user_count: number;
+  created_at: string;
+  status?:string;
+  totalCodes?:string;
 }
