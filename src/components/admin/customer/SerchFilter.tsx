@@ -5,21 +5,28 @@ interface SearchFilterProps {
   setStatusFilter: (status: string) => void;
 }
 
-export function SearchFilter({ searchTerm, setSearchTerm, statusFilter, setStatusFilter }: SearchFilterProps) {
+export function SearchFilter({
+  searchTerm,
+  setSearchTerm,
+  statusFilter,
+  setStatusFilter,
+}: SearchFilterProps) {
   return (
     <div className="bg-white rounded-lg shadow mb-6">
       <div className="px-6 py-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
             <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span>
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                🔍
+              </span>
               <input
                 type="text"
                 placeholder="Search customers..."
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 value={searchTerm}
                 onChange={(e) => {
-                  console.log('Search term:', e.target.value);
+                  console.log("Search term:", e.target.value);
                   setSearchTerm(e.target.value);
                 }}
               />
@@ -30,7 +37,7 @@ export function SearchFilter({ searchTerm, setSearchTerm, statusFilter, setStatu
             <select
               value={statusFilter}
               onChange={(e) => {
-                console.log('Status filter:', e.target.value);
+                console.log("Status filter:", e.target.value);
                 setStatusFilter(e.target.value);
               }}
               className="border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"

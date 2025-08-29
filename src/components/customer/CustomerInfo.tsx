@@ -4,7 +4,9 @@ import type { CustomerInfoProps } from "../../types";
 const CustomerInfo: React.FC<CustomerInfoProps> = ({ customerData }) => (
   <div className="bg-white rounded-lg shadow mb-8">
     <div className="px-6 py-4 border-b border-gray-200">
-      <h2 className="text-lg font-medium text-gray-900">Customer Information</h2>
+      <h2 className="text-lg font-medium text-gray-900">
+        Customer Information
+      </h2>
     </div>
     <div className="px-6 py-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -14,7 +16,9 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({ customerData }) => (
         </div>
         <div>
           <p className="text-sm font-medium text-gray-500">Primary Contact</p>
-          <p className="text-base text-gray-900">{customerData.primaryContact}</p>
+          <p className="text-base text-gray-900">
+            {customerData.primaryContact}
+          </p>
         </div>
         <div>
           <p className="text-sm font-medium text-gray-500">Email</p>

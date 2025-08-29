@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 // Cognito configuration
 const COGNITO_CONFIG = {
@@ -28,39 +28,41 @@ interface TokenResponse {
   token_type: string;
 }
 
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Utility to generate a random string for code_verifier
 const generateRandomString = (length: number): string => {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   const cryptoRandom = crypto.getRandomValues(new Uint8Array(length));
   return Array.from(cryptoRandom)
     .map((value) => characters[value % characters.length])
-    .join('');
+    .join("");
 };
 
 // Utility to generate code_challenge from code_verifier
 const generateCodeChallenge = async (codeVerifier: string): Promise<string> => {
   const encoder = new TextEncoder();
   const data = encoder.encode(codeVerifier);
-  const digest = await crypto.subtle.digest('SHA-256', data);
+  const digest = await crypto.subtle.digest("SHA-256", data);
   return btoa(String.fromCharCode(...new Uint8Array(digest)))
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
 };
 
 // Utility to encode code_verifier for state parameter
 const encodeCodeVerifier = (codeVerifier: string): string => {
-  return btoa(codeVerifier).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return btoa(codeVerifier)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
 };
 
 // Utility to decode code_verifier from state parameter
 const decodeCodeVerifier = (encoded: string): string => {
-  return atob(encoded.replace(/-/g, '+').replace(/_/g, '/'));
+  return atob(encoded.replace(/-/g, "+").replace(/_/g, "/"));
 };
-
 
 // AuthProvider component
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -71,7 +73,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     // Handle logout redirect
-    if (window.location.pathname === '/logged-out') {
+    if (window.location.pathname === "/logged-out") {
       setIsAuthenticated(false);
       setToken(null);
       setRefreshToken(null);
@@ -82,13 +84,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Handle authorization code redirect
     const handleAuthCode = async () => {
       const urlParams = new URLSearchParams(window.location.search);
-      const code = urlParams.get('code');
-      const state = urlParams.get('state');
+      const code = urlParams.get("code");
+      const state = urlParams.get("state");
       if (code && state) {
         try {
           const codeVerifier = decodeCodeVerifier(state);
           if (!codeVerifier) {
-            console.error('No code verifier found in state parameter');
+            console.error("No code verifier found in state parameter");
             setIsAuthenticated(false);
             setToken(null);
             setRefreshToken(null);
@@ -97,23 +99,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
 
           // Exchange code for tokens
-          const response = await fetch(`${COGNITO_CONFIG.cognitoDomain}/oauth2/token`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
-              'Accept': '*/*',
+          const response = await fetch(
+            `${COGNITO_CONFIG.cognitoDomain}/oauth2/token`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                Accept: "*/*",
+              },
+              body: new URLSearchParams({
+                grant_type: "authorization_code",
+                client_id: COGNITO_CONFIG.clientId,
+                code,
+                redirect_uri: COGNITO_CONFIG.redirectUri,
+                code_verifier: codeVerifier,
+              }),
             },
-            body: new URLSearchParams({
-              grant_type: 'authorization_code',
-              client_id: COGNITO_CONFIG.clientId,
-              code,
-              redirect_uri: COGNITO_CONFIG.redirectUri,
-              code_verifier: codeVerifier,
-            }),
-          });
+          );
 
           if (!response.ok) {
-            throw new Error('Token exchange failed');
+            throw new Error("Token exchange failed");
           }
 
           const data: TokenResponse = await response.json();
@@ -123,9 +128,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setIsAuthenticated(true);
 
           // Clear query parameters
-          window.history.replaceState({}, document.title, window.location.pathname);
+          window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname,
+          );
         } catch (err: unknown) {
-          console.error('Token exchange error:', err);
+          console.error("Token exchange error:", err);
           setIsAuthenticated(false);
           setToken(null);
           setRefreshToken(null);
@@ -140,21 +149,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const interval = setInterval(async () => {
       if (isAuthenticated && refreshToken) {
         try {
-          const response = await fetch(`${COGNITO_CONFIG.cognitoDomain}/oauth2/token`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
-              'Accept': '*/*',
+          const response = await fetch(
+            `${COGNITO_CONFIG.cognitoDomain}/oauth2/token`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                Accept: "*/*",
+              },
+              body: new URLSearchParams({
+                grant_type: "refresh_token",
+                client_id: COGNITO_CONFIG.clientId,
+                refresh_token: refreshToken,
+              }),
             },
-            body: new URLSearchParams({
-              grant_type: 'refresh_token',
-              client_id: COGNITO_CONFIG.clientId,
-              refresh_token: refreshToken,
-            }),
-          });
+          );
 
           if (!response.ok) {
-            throw new Error('Token refresh failed');
+            throw new Error("Token refresh failed");
           }
 
           const data: TokenResponse = await response.json();
@@ -162,7 +174,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setIdToken(data.id_token);
           setIsAuthenticated(true);
         } catch (err: unknown) {
-          console.error('Token refresh error:', err);
+          console.error("Token refresh error:", err);
           setIsAuthenticated(false);
           setToken(null);
           setRefreshToken(null);
@@ -184,7 +196,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }&redirect_uri=${encodeURIComponent(COGNITO_CONFIG.redirectUri)}&code_challenge=${codeChallenge}&code_challenge_method=S256&state=${encodedCodeVerifier}`;
       window.location.href = authUrl;
     } catch (err: unknown) {
-      console.error('Error initiating login:', err);
+      console.error("Error initiating login:", err);
     }
   };
 
@@ -195,12 +207,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setIdToken(null);
     const logoutUrl = `${COGNITO_CONFIG.cognitoDomain}/logout?client_id=${
       COGNITO_CONFIG.clientId
-    }&logout_uri=${COGNITO_CONFIG.logoutRedirectUri}`;    
+    }&logout_uri=${COGNITO_CONFIG.logoutRedirectUri}`;
     window.location.href = logoutUrl;
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, token, refreshToken, idToken, login, logout }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, token, refreshToken, idToken, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -209,7 +223,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

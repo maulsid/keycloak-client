@@ -1,7 +1,12 @@
 import type { AccessCodeStatCardProps } from "../../../types";
 
 // Stat Card Component
-const AccessCodeStatCard: React.FC<AccessCodeStatCardProps> = ({ title, value, icon, iconColor }) => (
+const AccessCodeStatCard: React.FC<AccessCodeStatCardProps> = ({
+  title,
+  value,
+  icon,
+  iconColor,
+}) => (
   <div className="bg-white rounded-lg shadow p-6">
     <div className="flex items-center">
       <div className={iconColor}>{icon}</div>

@@ -1,5 +1,5 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { fetchCodes } from '../../components/api/api';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { fetchCodes } from "../../components/api/api";
 
 interface Code {
   code_id: number;
@@ -22,8 +22,8 @@ interface CodeState {
 const initialState: CodeState = {
   codes: [],
   filteredCodes: [],
-  searchTerm: '',
-  statusFilter: 'all',
+  searchTerm: "",
+  statusFilter: "all",
   currentPage: 1,
   itemsPerPage: 10,
   loading: false,
@@ -33,54 +33,55 @@ const initialState: CodeState = {
 const fallbackCodes: Code[] = [
   {
     code_id: 1,
-    code: '0B4DA646',
-    status: 'assigned',
+    code: "0B4DA646",
+    status: "assigned",
     order_id: 1,
   },
   {
     code_id: 2,
-    code: 'E1D7862C',
-    status: 'assigned',
+    code: "E1D7862C",
+    status: "assigned",
     order_id: 1,
   },
   {
     code_id: 74,
-    code: '9WNZEP6MB9issss',
+    code: "9WNZEP6MB9issss",
     status: null,
     order_id: null,
   },
 ];
 
-export const fetchCodesThunk = createAsyncThunk<Code[], string | null, { rejectValue: string }>(
-  'codes/fetchCodes',
-  async (token, { rejectWithValue }) => {
-    try {
-      const data = await fetchCodes(token);
-      return data;
-    } catch (error) {
-      console.error('Error in fetchCodesThunk:', error); // Fix typo
-      if (error instanceof Error) {
-        return rejectWithValue(error.message);
-      }
-      return rejectWithValue('An unknown error occurred');
+export const fetchCodesThunk = createAsyncThunk<
+  Code[],
+  string | null,
+  { rejectValue: string }
+>("codes/fetchCodes", async (token, { rejectWithValue }) => {
+  try {
+    const data = await fetchCodes(token);
+    return data;
+  } catch (error) {
+    console.error("Error in fetchCodesThunk:", error); // Fix typo
+    if (error instanceof Error) {
+      return rejectWithValue(error.message);
     }
+    return rejectWithValue("An unknown error occurred");
   }
-);
+});
 
 const codesSlice = createSlice({
-  name: 'codes',
+  name: "codes",
   initialState,
   reducers: {
     setSearchTerm: (state, action: { payload: string }) => {
       state.searchTerm = action.payload;
       state.filteredCodes = state.codes.filter((code) =>
-        code.code.toLowerCase().includes(action.payload.toLowerCase())
+        code.code.toLowerCase().includes(action.payload.toLowerCase()),
       );
-      if (state.statusFilter !== 'all') {
+      if (state.statusFilter !== "all") {
         state.filteredCodes = state.filteredCodes.filter(
           (code) =>
-            (state.statusFilter === 'assigned' && code.status === 'assigned') ||
-            (state.statusFilter === 'unassigned' && !code.status)
+            (state.statusFilter === "assigned" && code.status === "assigned") ||
+            (state.statusFilter === "unassigned" && !code.status),
         );
       }
       state.currentPage = 1;
@@ -88,13 +89,13 @@ const codesSlice = createSlice({
     setStatusFilter: (state, action: { payload: string }) => {
       state.statusFilter = action.payload;
       state.filteredCodes = state.codes.filter((code) =>
-        code.code.toLowerCase().includes(state.searchTerm.toLowerCase())
+        code.code.toLowerCase().includes(state.searchTerm.toLowerCase()),
       );
-      if (action.payload !== 'all') {
+      if (action.payload !== "all") {
         state.filteredCodes = state.filteredCodes.filter(
           (code) =>
-            (action.payload === 'assigned' && code.status === 'assigned') ||
-            (action.payload === 'unassigned' && !code.status)
+            (action.payload === "assigned" && code.status === "assigned") ||
+            (action.payload === "unassigned" && !code.status),
         );
       }
       state.currentPage = 1;
@@ -103,8 +104,8 @@ const codesSlice = createSlice({
       state.currentPage = action.payload;
     },
     resetSearch: (state) => {
-      state.searchTerm = '';
-      state.statusFilter = 'all';
+      state.searchTerm = "";
+      state.statusFilter = "all";
       state.filteredCodes = state.codes;
       state.currentPage = 1;
     },
@@ -118,28 +119,33 @@ const codesSlice = createSlice({
       .addCase(fetchCodesThunk.fulfilled, (state, action) => {
         state.loading = false;
         state.codes = action.payload.length ? action.payload : fallbackCodes;
-        state.filteredCodes = action.payload.length ? action.payload : fallbackCodes;
+        state.filteredCodes = action.payload.length
+          ? action.payload
+          : fallbackCodes;
         if (state.searchTerm) {
           state.filteredCodes = state.filteredCodes.filter((code) =>
-            code.code.toLowerCase().includes(state.searchTerm.toLowerCase())
+            code.code.toLowerCase().includes(state.searchTerm.toLowerCase()),
           );
         }
-        if (state.statusFilter !== 'all') {
+        if (state.statusFilter !== "all") {
           state.filteredCodes = state.filteredCodes.filter(
             (code) =>
-              (state.statusFilter === 'assigned' && code.status === 'assigned') ||
-              (state.statusFilter === 'unassigned' && !code.status)
+              (state.statusFilter === "assigned" &&
+                code.status === "assigned") ||
+              (state.statusFilter === "unassigned" && !code.status),
           );
         }
       })
       .addCase(fetchCodesThunk.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || 'Unable to fetch data. Using fallback data.';
+        state.error =
+          action.payload || "Unable to fetch data. Using fallback data.";
         state.codes = fallbackCodes;
         state.filteredCodes = fallbackCodes;
       });
   },
 });
 
-export const { setSearchTerm, setStatusFilter, setCurrentPage, resetSearch } = codesSlice.actions;
+export const { setSearchTerm, setStatusFilter, setCurrentPage, resetSearch } =
+  codesSlice.actions;
 export default codesSlice.reducer;

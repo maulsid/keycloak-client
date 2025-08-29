@@ -50,7 +50,7 @@ export interface AdminActionCardProps {
 export interface Code {
   code_id: number;
   code: string;
-  status: 'assigned' | 'available' | 'utilized'; 
+  status: "assigned" | "available" | "utilized";
   order_id: number;
 }
 
@@ -185,6 +185,6 @@ export interface Customer {
   codes_available: number;
   user_count: number;
   created_at: string;
-  status?:string;
-  totalCodes?:string;
+  status?: string;
+  totalCodes?: string;
 }

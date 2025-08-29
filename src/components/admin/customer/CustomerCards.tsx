@@ -1,7 +1,5 @@
-import { FaUsers, FaCheckCircle, FaClock, FaKey } from 'react-icons/fa';
-import type { Customer } from '../../../types';
-
-
+import { FaUsers, FaCheckCircle, FaClock, FaKey } from "react-icons/fa";
+import type { Customer } from "../../../types";
 
 export function CustomerCards({ customers }: { customers: Customer[] }) {
   return (
@@ -11,7 +9,9 @@ export function CustomerCards({ customers }: { customers: Customer[] }) {
           <FaUsers className="h-8 w-8 text-blue-600" />
           <div className="ml-4">
             <p className="text-sm font-medium text-gray-500">Total Customers</p>
-            <p className="text-2xl font-bold text-gray-900">{customers.length}</p>
+            <p className="text-2xl font-bold text-gray-900">
+              {customers.length}
+            </p>
           </div>
         </div>
       </div>
@@ -20,7 +20,9 @@ export function CustomerCards({ customers }: { customers: Customer[] }) {
           <FaCheckCircle className="h-8 w-8 text-green-600" />
           <div className="ml-4">
             <p className="text-sm font-medium text-gray-500">Active</p>
-            <p className="text-2xl font-bold text-gray-900">{customers.filter((c) => c.status === 'active').length}</p>
+            <p className="text-2xl font-bold text-gray-900">
+              {customers.filter((c) => c.status === "active").length}
+            </p>
           </div>
         </div>
       </div>
@@ -29,7 +31,9 @@ export function CustomerCards({ customers }: { customers: Customer[] }) {
           <FaClock className="h-8 w-8 text-yellow-600" />
           <div className="ml-4">
             <p className="text-sm font-medium text-gray-500">Pending</p>
-            <p className="text-2xl font-bold text-gray-900">{customers.filter((c) => c.status === 'pending').length}</p>
+            <p className="text-2xl font-bold text-gray-900">
+              {customers.filter((c) => c.status === "pending").length}
+            </p>
           </div>
         </div>
       </div>
@@ -38,7 +42,9 @@ export function CustomerCards({ customers }: { customers: Customer[] }) {
           <FaKey className="h-8 w-8 text-purple-600" />
           <div className="ml-4">
             <p className="text-sm font-medium text-gray-500">Total Codes</p>
-            <p className="text-2xl font-bold text-gray-900">{customers.reduce((sum, c) => sum + c.total_codes_ordered, 0)}</p>
+            <p className="text-2xl font-bold text-gray-900">
+              {customers.reduce((sum, c) => sum + c.total_codes_ordered, 0)}
+            </p>
           </div>
         </div>
       </div>

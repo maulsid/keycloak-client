@@ -5,7 +5,11 @@ import { useAuth } from "../../context/CognitoAuth";
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, token } = useAuth();
   // Allow access only if isAuthenticated is true and a token exists
-  return isAuthenticated && token ? <>{children}</> : <Navigate to="/login" replace />;
+  return isAuthenticated && token ? (
+    <>{children}</>
+  ) : (
+    <Navigate to="/login" replace />
+  );
 };
 
 export default ProtectedRoute;

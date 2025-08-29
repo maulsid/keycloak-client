@@ -1,23 +1,23 @@
-import { useState, useEffect } from 'react';
-import CustomerStatCard from '../../components/customer/CustomerStatsCard';
-import type { CustomerData } from '../../types';
-import CustomerInfo from '../../components/customer/CustomerInfo';
-import CustomerActionCard from '../../components/customer/CustomerActionCard';
-import CustomerActivityItem from '../../components/customer/CustomerActivityItem';
-import { actionCards, statCards } from '../../utils/data/CutomerDashbaordData';
-import Header from '../../components/common/Header';
-import { Loading } from '../../components/common/Loading';
-import { Error } from '../../components/common/Error';
-import CustomerFooter from '../../components/customer/CustomerFooter';
+import { useState, useEffect } from "react";
+import CustomerStatCard from "../../components/customer/CustomerStatsCard";
+import type { CustomerData } from "../../types";
+import CustomerInfo from "../../components/customer/CustomerInfo";
+import CustomerActionCard from "../../components/customer/CustomerActionCard";
+import CustomerActivityItem from "../../components/customer/CustomerActivityItem";
+import { actionCards, statCards } from "../../utils/data/CutomerDashbaordData";
+import Header from "../../components/common/Header";
+import { Loading } from "../../components/common/Loading";
+import { Error } from "../../components/common/Error";
+import CustomerFooter from "../../components/customer/CustomerFooter";
 
 // Define user outside the component to ensure a stable reference
 const user = {
-  id: '001',
-  companyName: 'Medical Center',
-  firstName: 'John',
-  lastName: 'Doe',
-  email: 'john.doe@medicalcenter.com',
-  phoneNumber: '555-123-4567',
+  id: "001",
+  companyName: "Medical Center",
+  firstName: "John",
+  lastName: "Doe",
+  email: "john.doe@medicalcenter.com",
+  phoneNumber: "555-123-4567",
 };
 
 // Main CustomerDashboard Component
@@ -41,15 +41,33 @@ const CustomerDashboard: React.FC = () => {
           utilizedCodes: 60,
           availableCodes: 40,
           recentActivity: [
-            { id: 1, action: 'New access code requested', patientId: 'PAT-001', date: '2024-01-15', status: 'completed' },
-            { id: 2, action: 'Patient report viewed', patientId: 'PAT-002', date: '2024-01-14', status: 'completed' },
-            { id: 3, action: 'Marketing materials downloaded', patientId: undefined, date: '2024-01-13', status: 'completed' },
+            {
+              id: 1,
+              action: "New access code requested",
+              patientId: "PAT-001",
+              date: "2024-01-15",
+              status: "completed",
+            },
+            {
+              id: 2,
+              action: "Patient report viewed",
+              patientId: "PAT-002",
+              date: "2024-01-14",
+              status: "completed",
+            },
+            {
+              id: 3,
+              action: "Marketing materials downloaded",
+              patientId: undefined,
+              date: "2024-01-13",
+              status: "completed",
+            },
           ],
         };
         setCustomerData(mockData);
       } catch (err) {
-        console.error('Error fetching customer data:', err);
-        setError('Failed to load customer data');
+        console.error("Error fetching customer data:", err);
+        setError("Failed to load customer data");
       } finally {
         setLoading(false);
       }
@@ -67,12 +85,16 @@ const CustomerDashboard: React.FC = () => {
   }
 
   if (error || !customerData) {
-    return <Error message={error || 'Failed to load customer dashboard'} />;
+    return <Error message={error || "Failed to load customer dashboard"} />;
   }
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <Header title="Rejoyn Portal" primaryContact={customerData.primaryContact} isSettings />
+      <Header
+        title="Rejoyn Portal"
+        primaryContact={customerData.primaryContact}
+        isSettings
+      />
 
       <div className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -101,7 +123,9 @@ const CustomerDashboard: React.FC = () => {
         </div>
         <div className="bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-medium text-gray-900">Recent Activity</h2>
+            <h2 className="text-lg font-medium text-gray-900">
+              Recent Activity
+            </h2>
           </div>
           <div className="px-6 py-4">
             <div className="space-y-4">

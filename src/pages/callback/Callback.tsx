@@ -5,7 +5,7 @@ import { Loading } from "../../components/common/Loading";
 
 // Interface for JWT payload
 interface IdTokenPayload {
-  'role'?: string;
+  role?: string;
   sub: string;
   email?: string;
 }
@@ -13,45 +13,45 @@ interface IdTokenPayload {
 // Utility to decode JWT (id_token) payload
 const decodeJwt = (token: string): IdTokenPayload | null => {
   try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
     const jsonPayload = decodeURIComponent(
       atob(base64)
-        .split('')
-        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join(""),
     );
     return JSON.parse(jsonPayload);
   } catch (err) {
-    console.error('Error decoding JWT:', err);
+    console.error("Error decoding JWT:", err);
     return null;
   }
 };
 
 // Callback component
 const Callback: React.FC = () => {
-  const { isAuthenticated,token } = useAuth();
+  const { isAuthenticated, token } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     const handleCallback = async () => {
-      if (isAuthenticated  && token) {
+      if (isAuthenticated && token) {
         const payload = decodeJwt(token);
         if (!payload) {
-          console.error('Invalid id_token');
+          console.error("Invalid id_token");
           return;
         }
 
-        const role = payload['role'] || '';
+        const role = payload["role"] || "";
         console.log("role", role);
 
-        if (role.includes('admin')) {
-          navigate('/admin/dashboard');
-        } else if (role.includes('customer')) {
-          navigate('/customer/dashboard');
+        if (role.includes("admin")) {
+          navigate("/admin/dashboard");
+        } else if (role.includes("customer")) {
+          navigate("/customer/dashboard");
         } else {
-          console.error('User has no recognized role');
-          navigate('/login');
+          console.error("User has no recognized role");
+          navigate("/login");
         }
       }
     };
@@ -59,9 +59,7 @@ const Callback: React.FC = () => {
     handleCallback();
   }, [isAuthenticated, token, navigate]);
 
-  return (
-    <Loading />
-  );
+  return <Loading />;
 };
 
 export default Callback;

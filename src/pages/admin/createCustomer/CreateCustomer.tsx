@@ -1,6 +1,11 @@
-import { useState } from 'react';
-import {  FaUser, FaCheckCircle, FaExclamationTriangle, FaCopy } from 'react-icons/fa';
-import Header from '../../../components/common/Header';
+import { useState } from "react";
+import {
+  FaUser,
+  FaCheckCircle,
+  FaExclamationTriangle,
+  FaCopy,
+} from "react-icons/fa";
+import Header from "../../../components/common/Header";
 
 // Define the shape of form data
 interface FormData {
@@ -17,42 +22,49 @@ interface FormData {
 
 export default function CreateCustomer() {
   const [formData, setFormData] = useState<FormData>({
-    customerName: '',
-    address: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    primaryContactName: '',
-    primaryContactEmail: '',
-    primaryContactPhone: '',
+    customerName: "",
+    address: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    primaryContactName: "",
+    primaryContactEmail: "",
+    primaryContactPhone: "",
     initialAccessCodes: 50,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [error, setError] = useState('');
-  const [generatedInvitation, setGeneratedInvitation] = useState('');
+  const [error, setError] = useState("");
+  const [generatedInvitation, setGeneratedInvitation] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    setError("");
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       // Validate form
-      if (!formData.customerName || !formData.primaryContactName || !formData.primaryContactEmail) {
-        setError('Please fill in all required fields');
+      if (
+        !formData.customerName ||
+        !formData.primaryContactName ||
+        !formData.primaryContactEmail
+      ) {
+        setError("Please fill in all required fields");
         return;
       }
       // Generate customer ID and invitation link
-      const customerId = `CUST-${new Date().getFullYear()}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+      const customerId = `CUST-${new Date().getFullYear()}-${Math.floor(
+        Math.random() * 1000,
+      )
+        .toString()
+        .padStart(3, "0")}`;
       const invitationLink = `https://rejoyn-portal.com/register?invite=${btoa(customerId)}`;
       setGeneratedInvitation(invitationLink);
       setSuccess(true);
     } catch (err) {
-      setError('Failed to create customer. Please try again.');
-      console.log("err",err);
-      
+      setError("Failed to create customer. Please try again.");
+      console.log("err", err);
     } finally {
       setIsLoading(false);
     }
@@ -68,21 +80,37 @@ export default function CreateCustomer() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="max-w-2xl w-full bg-white rounded-lg shadow-lg p-8">
           <FaCheckCircle className="mx-auto h-16 w-16 text-green-600 mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">Customer Created Successfully!</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
+            Customer Created Successfully!
+          </h2>
           <p className="text-gray-600 mb-6 text-center">
-            The customer account has been created and an invitation link has been generated.
+            The customer account has been created and an invitation link has
+            been generated.
           </p>
           <div className="bg-green-50 border border-green-200 rounded-md p-4 mb-6">
-            <h3 className="text-sm font-medium text-green-800 mb-2">Customer Details</h3>
+            <h3 className="text-sm font-medium text-green-800 mb-2">
+              Customer Details
+            </h3>
             <div className="space-y-2 text-sm text-green-700">
-              <p><strong>Customer Name:</strong> {formData.customerName}</p>
-              <p><strong>Primary Contact:</strong> {formData.primaryContactName}</p>
-              <p><strong>Email:</strong> {formData.primaryContactEmail}</p>
-              <p><strong>Initial Access Codes:</strong> {formData.initialAccessCodes}</p>
+              <p>
+                <strong>Customer Name:</strong> {formData.customerName}
+              </p>
+              <p>
+                <strong>Primary Contact:</strong> {formData.primaryContactName}
+              </p>
+              <p>
+                <strong>Email:</strong> {formData.primaryContactEmail}
+              </p>
+              <p>
+                <strong>Initial Access Codes:</strong>{" "}
+                {formData.initialAccessCodes}
+              </p>
             </div>
           </div>
           <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
-            <h3 className="text-sm font-medium text-blue-800 mb-2">Invitation Link</h3>
+            <h3 className="text-sm font-medium text-blue-800 mb-2">
+              Invitation Link
+            </h3>
             <div className="flex items-center space-x-2">
               <input
                 type="text"
@@ -99,7 +127,8 @@ export default function CreateCustomer() {
               </button>
             </div>
             <p className="text-xs text-blue-600 mt-2">
-              Send this link to the customer to allow them to register for the portal.
+              Send this link to the customer to allow them to register for the
+              portal.
             </p>
           </div>
           <div className="flex space-x-4">
@@ -107,14 +136,14 @@ export default function CreateCustomer() {
               onClick={() => {
                 setSuccess(false);
                 setFormData({
-                  customerName: '',
-                  address: '',
-                  city: '',
-                  state: '',
-                  zipCode: '',
-                  primaryContactName: '',
-                  primaryContactEmail: '',
-                  primaryContactPhone: '',
+                  customerName: "",
+                  address: "",
+                  city: "",
+                  state: "",
+                  zipCode: "",
+                  primaryContactName: "",
+                  primaryContactEmail: "",
+                  primaryContactPhone: "",
                   initialAccessCodes: 50,
                 });
               }}
@@ -136,13 +165,20 @@ export default function CreateCustomer() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header title="Create New Customer" showBackButton backLink='/admin/dashboard'/>
+      <Header
+        title="Create New Customer"
+        showBackButton
+        backLink="/admin/dashboard"
+      />
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-medium text-gray-900">Customer Information</h2>
+            <h2 className="text-lg font-medium text-gray-900">
+              Customer Information
+            </h2>
             <p className="text-sm text-gray-500 mt-1">
-              Create a new customer account and generate an invitation link for portal access.
+              Create a new customer account and generate an invitation link for
+              portal access.
             </p>
           </div>
           <form onSubmit={handleSubmit} className="px-6 py-6 space-y-6">
@@ -155,10 +191,15 @@ export default function CreateCustomer() {
               </div>
             )}
             <div>
-              <h3 className="text-md font-medium text-gray-900 mb-4">Organization Details</h3>
+              <h3 className="text-md font-medium text-gray-900 mb-4">
+                Organization Details
+              </h3>
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="customerName" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="customerName"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     Organization Name <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -168,12 +209,17 @@ export default function CreateCustomer() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     placeholder="e.g., Acme Medical Center"
                     value={formData.customerName}
-                    onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, customerName: e.target.value })
+                    }
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label
+                      htmlFor="address"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
                       Address
                     </label>
                     <input
@@ -182,11 +228,16 @@ export default function CreateCustomer() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Street address"
                       value={formData.address}
-                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, address: e.target.value })
+                      }
                     />
                   </div>
                   <div>
-                    <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label
+                      htmlFor="city"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
                       City
                     </label>
                     <input
@@ -195,13 +246,18 @@ export default function CreateCustomer() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                       placeholder="City"
                       value={formData.city}
-                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, city: e.target.value })
+                      }
                     />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label
+                      htmlFor="state"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
                       State
                     </label>
                     <input
@@ -210,11 +266,16 @@ export default function CreateCustomer() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                       placeholder="State"
                       value={formData.state}
-                      onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, state: e.target.value })
+                      }
                     />
                   </div>
                   <div>
-                    <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label
+                      htmlFor="zipCode"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
                       ZIP Code
                     </label>
                     <input
@@ -223,17 +284,24 @@ export default function CreateCustomer() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                       placeholder="ZIP code"
                       value={formData.zipCode}
-                      onChange={(e) => setFormData({ ...formData, zipCode: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, zipCode: e.target.value })
+                      }
                     />
                   </div>
                 </div>
               </div>
             </div>
             <div>
-              <h3 className="text-md font-medium text-gray-900 mb-4">Primary Contact</h3>
+              <h3 className="text-md font-medium text-gray-900 mb-4">
+                Primary Contact
+              </h3>
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="primaryContactName" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="primaryContactName"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     Contact Name <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -243,12 +311,20 @@ export default function CreateCustomer() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Full name"
                     value={formData.primaryContactName}
-                    onChange={(e) => setFormData({ ...formData, primaryContactName: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        primaryContactName: e.target.value,
+                      })
+                    }
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="primaryContactEmail" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label
+                      htmlFor="primaryContactEmail"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
                       Email <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -258,11 +334,19 @@ export default function CreateCustomer() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                       placeholder="contact@example.com"
                       value={formData.primaryContactEmail}
-                      onChange={(e) => setFormData({ ...formData, primaryContactEmail: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          primaryContactEmail: e.target.value,
+                        })
+                      }
                     />
                   </div>
                   <div>
-                    <label htmlFor="primaryContactPhone" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label
+                      htmlFor="primaryContactPhone"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
                       Phone
                     </label>
                     <input
@@ -271,16 +355,26 @@ export default function CreateCustomer() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                       placeholder="(555) 123-4567"
                       value={formData.primaryContactPhone}
-                      onChange={(e) => setFormData({ ...formData, primaryContactPhone: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          primaryContactPhone: e.target.value,
+                        })
+                      }
                     />
                   </div>
                 </div>
               </div>
             </div>
             <div>
-              <h3 className="text-md font-medium text-gray-900 mb-4">Initial Access Codes</h3>
+              <h3 className="text-md font-medium text-gray-900 mb-4">
+                Initial Access Codes
+              </h3>
               <div>
-                <label htmlFor="initialAccessCodes" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="initialAccessCodes"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Number of Access Codes
                 </label>
                 <input
@@ -290,10 +384,16 @@ export default function CreateCustomer() {
                   max="1000"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   value={formData.initialAccessCodes}
-                  onChange={(e) => setFormData({ ...formData, initialAccessCodes: parseInt(e.target.value) || 0 })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      initialAccessCodes: parseInt(e.target.value) || 0,
+                    })
+                  }
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  This will be the initial allocation of access codes for the customer.
+                  This will be the initial allocation of access codes for the
+                  customer.
                 </p>
               </div>
             </div>
@@ -325,12 +425,22 @@ export default function CreateCustomer() {
           </form>
         </div>
         <div className="mt-6 bg-blue-50 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-blue-900 mb-2">Important Information</h3>
+          <h3 className="text-sm font-medium text-blue-900 mb-2">
+            Important Information
+          </h3>
           <ul className="text-sm text-blue-800 space-y-1">
             <li>• A unique Customer ID will be automatically generated</li>
-            <li>• An invitation link will be created for the customer to register</li>
-            <li>• The customer will receive the specified number of initial access codes</li>
-            <li>• You can provision additional codes later through the admin dashboard</li>
+            <li>
+              • An invitation link will be created for the customer to register
+            </li>
+            <li>
+              • The customer will receive the specified number of initial access
+              codes
+            </li>
+            <li>
+              • You can provision additional codes later through the admin
+              dashboard
+            </li>
           </ul>
         </div>
       </div>
