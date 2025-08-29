@@ -22,7 +22,7 @@ export default function AdminCustomers() {
 
   useEffect(() => {
     if (token) {
-      dispatch(fetchCustomersThunk(token) as any);
+      dispatch(fetchCustomersThunk(token));
     } else {
       dispatch({
         type: 'customers/fetchCustomers/rejected',

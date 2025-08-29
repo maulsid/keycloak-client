@@ -1,8 +1,7 @@
 import axios from 'axios';
-import type { Customer } from '../../types';
+import type { Code, Customer } from '../../types';
 
-export const fetchCodes = async (token: string | null): Promise<any[]> => {
-  try {
+export const fetchCodes = async (token: string | null): Promise<Code[]> => {
     if (!token) {
       throw new Error('No authentication token provided');
     }
@@ -14,13 +13,8 @@ export const fetchCodes = async (token: string | null): Promise<any[]> => {
     });
     const data = response.data;
     return data.codes || [];
-  } catch (error) {
-
-    throw error;
-  }
 };
 export const fetchCustomers = async (token: string): Promise<Customer[]> => {
-  try {
     if (!token) {
       throw new Error('No authentication token provided');
     }
@@ -36,8 +30,4 @@ export const fetchCustomers = async (token: string): Promise<Customer[]> => {
 
     const data = response.data;
     return data.customers || [];
-  } catch (error) {
-    console.error('Error in fetchCustomers:', error);
-    throw error;
-  }
 };

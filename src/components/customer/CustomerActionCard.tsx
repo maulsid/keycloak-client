@@ -11,7 +11,6 @@ const CustomerActionCard: React.FC<CustomerActionCardProps> = ({ title, descript
     >
       <div className="flex items-center justify-between">
         <div>
-            {/* @ts-ignore */}
           <Icon className={`${iconColor} h-8 w-8`} />
           <h3 className="text-lg font-medium text-gray-900">{title}</h3>
           <p className="text-sm text-gray-500">{description}</p>

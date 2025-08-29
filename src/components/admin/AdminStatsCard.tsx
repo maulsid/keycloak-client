@@ -1,7 +1,7 @@
 import type { AdminStatCardProps } from "../../types";
 
 // Stat Card Component
-const AdminStatCard: React.FC<AdminStatCardProps> = ({ title, value, icon:Icon, color }) => (
+const AdminStatCard: React.FC<AdminStatCardProps> = ({ title, value, icon:Icon }) => (
   <div className="bg-white rounded-lg shadow p-6">
     <div className="flex items-center">
       <Icon />

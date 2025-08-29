@@ -81,7 +81,6 @@ const CustomerDashboard: React.FC = () => {
               key={index}
               title={card.title}
               value={card.value(customerData)} // Resolve value function
-              // @ts-ignore              
               icon={card.icon}
               iconColor={card.iconColor}
             />
@@ -95,7 +94,6 @@ const CustomerDashboard: React.FC = () => {
               title={card.title}
               description={card.description}
               link={card.link}
-              // @ts-ignore
               icon={card.icon}
               iconColor={card.iconColor}
             />

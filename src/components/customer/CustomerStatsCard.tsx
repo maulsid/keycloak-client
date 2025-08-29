@@ -6,7 +6,6 @@ const CustomerStatCard: React.FC<CustomerStatCardProps> = ({ title, value, icon:
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex items-center">
         <div className="flex-shrink-0">
-          {/* @ts-ignore */}
           <Icon className={`${iconColor} h-8 w-8`} /> 
         </div>
         <div className="ml-4">

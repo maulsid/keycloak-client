@@ -64,7 +64,7 @@ const fallbackCustomers: Customer[] = [
   },
 ];
 
-export const fetchCustomersThunk = createAsyncThunk<Customer[], string, { rejectValue: any }>(
+export const fetchCustomersThunk = createAsyncThunk<Customer[], string, { rejectValue: string }>(
   'customers/fetchCustomers',
   async (token, { rejectWithValue }) => {
     try {
@@ -126,13 +126,11 @@ const customersSlice = createSlice({
       .addCase(fetchCustomersThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
-        console.log('fetchCustomersThunk: Pending');
       })
       .addCase(fetchCustomersThunk.fulfilled, (state, action:{ payload: Customer[] }) => {
         state.loading = false;
         state.customers = action.payload.length ? action.payload : fallbackCustomers;
         state.filteredCustomers = action.payload.length ? action.payload : fallbackCustomers;
-        console.log('fetchCustomersThunk: Fulfilled with data:', action.payload);
         if (state.searchTerm) {
           state.filteredCustomers = state.filteredCustomers.filter(
             (customer) =>
@@ -151,7 +149,6 @@ const customersSlice = createSlice({
         state.error = action.payload || 'Unable to fetch data. Using fallback data.';
         state.customers = fallbackCustomers;
         state.filteredCustomers = fallbackCustomers;
-        console.log('fetchCustomersThunk: Rejected with error:', action.payload);
       });
   },
 });

@@ -51,6 +51,8 @@ export default function CreateCustomer() {
       setSuccess(true);
     } catch (err) {
       setError('Failed to create customer. Please try again.');
+      console.log("err",err);
+      
     } finally {
       setIsLoading(false);
     }

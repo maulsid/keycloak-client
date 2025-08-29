@@ -13,7 +13,7 @@ const LoginPortalCard: React.FC<LoginPortalCardProps> = ({ title, icon, descript
     if (isAuthenticated) {
       navigate(`${buttonLink}`, { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate,buttonLink]);
   return(
   <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
     <div className="flex items-center mb-6">

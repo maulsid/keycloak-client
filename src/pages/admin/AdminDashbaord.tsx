@@ -1,4 +1,4 @@
-import { useState, useEffect, type JSX } from 'react';
+import { useState, useEffect } from 'react';
 import AdminStatCard from '../../components/admin/AdminStatsCard';
 import type { AdminData } from '../../types';
 import AdminActionCard from '../../components/admin/AdminActionCard';
@@ -64,7 +64,6 @@ const AdminDashboard: React.FC = () => {
               title={card.title}
               value={card.value(adminData)}
               icon={card.icon}
-              color={card.color}
             />
           ))}
         </div>

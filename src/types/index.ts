@@ -1,4 +1,4 @@
-import type { FC, JSX } from "react";
+import type { FC, JSX, SVGProps } from "react";
 
 export interface User {
   id: number;
@@ -39,7 +39,6 @@ export interface AdminStatCardProps {
   title: string;
   value: number;
   icon: FC;
-  color: string;
 }
 export interface AdminActionCardProps {
   title: string;
@@ -47,6 +46,12 @@ export interface AdminActionCardProps {
   link: string;
   icon: FC;
   iconColor: string;
+}
+export interface Code {
+  code_id: number;
+  code: string;
+  status: 'assigned' | 'available' | 'utilized'; 
+  order_id: number;
 }
 
 export interface AdminAlertBannerProps {
@@ -98,7 +103,7 @@ export interface CustomerData {
 export interface CustomerStatCardProps {
   title: string;
   value: string | number;
-  icon: JSX.Element;
+  icon: React.ComponentType<SVGProps<SVGSVGElement>>;
   iconColor: string;
 }
 
@@ -110,7 +115,7 @@ export interface CustomerActionCardProps {
   title: string;
   description: string;
   link: string;
-  icon: JSX.Element;
+  icon: React.ComponentType<SVGProps<SVGSVGElement>>;
   iconColor: string;
 }
 

@@ -24,7 +24,7 @@ const AccessCodes: React.FC = () => {
     const { token } = useAuth();
   useEffect(() => {
     if (token) {
-      dispatch(fetchCodesThunk(token) as any);
+      dispatch(fetchCodesThunk(token));
     } else {
       dispatch({
         type: 'codes/fetchCodes/rejected',

@@ -17,14 +17,16 @@ const AppRoutes = () => {
       <Route path="/" element={<Login />} />
       <Route path="/callback" element={<Callback />} />
       <Route path="*" element={<NotFound />} />
+      <Route path="/customer/access-codes" element={<AccessCodes />} />
 
       <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
+        {/*admin dashboard routes*/}
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path='/admin/customers' element={<AdminCustomers />} />
         <Route path='/admin/create-customer' element={<CreateCustomer />} />
         <Route path='/admin/provision-codes' element={<ProvisionCodes />} />
-      <Route path="/customer/dashboard" element={<CustomerDashboard />} />
-      <Route path="/customer/access-codes" element={<AccessCodes />} />
+        {/*customer dashboard routes*/}
+        <Route path="/customer/dashboard" element={<CustomerDashboard />} />
       </Route>
     </Routes>
   );

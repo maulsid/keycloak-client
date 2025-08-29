@@ -27,7 +27,6 @@ export default function ProvisionCodes() {
     // Mock user authentication
     const user = { id: 'admin123', role: 'admin' }; // Simulated logged-in user
     const authLoading = false;
-
     useEffect(() => {
         const fetchCustomers = async () => {
             if (!user) {
@@ -71,12 +70,12 @@ export default function ProvisionCodes() {
                 setLoading(false);
             }
         };
-
         if (user) {
             fetchCustomers();
         } else {
             setLoading(false);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const filteredCustomers = customers.filter(
@@ -114,6 +113,8 @@ export default function ProvisionCodes() {
             }, 3000);
         } catch (err) {
             setError('Failed to provision codes. Please try again.');
+            console.log("err",err);
+            
         } finally {
             setIsLoading(false);
         }
