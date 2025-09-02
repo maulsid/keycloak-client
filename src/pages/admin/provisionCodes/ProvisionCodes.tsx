@@ -5,9 +5,13 @@ import {
   FaExclamationTriangle,
   FaSearch,
 } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
 import { Loading } from "../../../components/common/Loading";
 import { Error } from "../../../components/common/Error";
 import Header from "../../../components/common/Header";
+import { fetchCustomersThunk } from "../../../redux/slices/customerSlice";
+import { useAuth } from "../../../context/CognitoAuth";
+import type { RootState } from "../../../redux/store";
 
 // Define the shape of customer data
 interface Customer {
@@ -26,96 +30,52 @@ export default function ProvisionCodes() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  // Mock user authentication
-  const user = { id: "admin123", role: "admin" }; // Simulated logged-in user
-  const authLoading = false;
+  const dispatch = useDispatch();
+  const { token } = useAuth();
+  const { customers, loading, error: fetchError } = useSelector(
+    (state: RootState) => state.customers,
+  );
+
+  // Fetch customers when component mounts or token changes
   useEffect(() => {
-    const fetchCustomers = async () => {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-      try {
-        setLoading(true);
-        // Mock API response
-        const mockUsers = [
-          {
-            id: "cust1",
-            role: "customer",
-            companyName: "Acme Medical",
-            firstName: "John",
-            lastName: "Doe",
-            email: "john.doe@acme.com",
-          },
-          {
-            id: "cust2",
-            role: "customer",
-            companyName: "HealthCorp",
-            firstName: "Jane",
-            lastName: "Smith",
-            email: "jane.smith@healthcorp.com",
-          },
-        ];
-        const mockAccessCodes = [
-          { customerId: "cust1", status: "available" },
-          { customerId: "cust1", status: "used" },
-          { customerId: "cust2", status: "available" },
-        ];
-
-        // Transform users into customer format
-        const customerData: Customer[] = mockUsers
-          .filter((u) => u.role === "customer")
-          .map((user) => {
-            const customerCodes = mockAccessCodes.filter(
-              (code) => code.customerId === user.id,
-            );
-            const currentCodes = customerCodes.filter(
-              (code) => code.status === "available",
-            ).length;
-            const totalPurchased = customerCodes.length;
-            return {
-              id: user.id,
-              name: user.companyName || `${user.firstName} ${user.lastName}`,
-              primaryContact: `${user.firstName} ${user.lastName}`,
-              email: user.email,
-              currentCodes,
-              totalPurchased,
-            };
-          });
-        setCustomers(customerData);
-      } catch (err) {
-        console.error("Error fetching customers:", err);
-        setError("Failed to load customers data.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (user) {
-      fetchCustomers();
+    if (token) {
+      dispatch(fetchCustomersThunk(token) as any);
     } else {
-      setLoading(false);
+      dispatch({
+        type: "customers/fetchCustomers/rejected",
+        payload: "No authentication token available",
+      });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [dispatch, token]);
 
-  const filteredCustomers = customers.filter(
+  // Transform API response to match Customer interface
+  const transformedCustomers: Customer[] = customers.map((customer) => ({
+    id: customer.customer_id.toString(),
+    name: customer.name,
+    primaryContact: customer.customer_contacts[0]?.name || "Unknown Contact",
+    email: customer.customer_contacts[0]?.email || "No email provided",
+    currentCodes: customer.codes_available,
+    totalPurchased: customer.total_codes_ordered,
+  }));
+
+  const filteredCustomers = transformedCustomers.filter(
     (customer) =>
       customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       customer.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       customer.primaryContact.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  const selectedCustomerData = customers.find((c) => c.id === selectedCustomer);
+  const selectedCustomerData = transformedCustomers.find(
+    (c) => c.id === selectedCustomer,
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
     try {
-      // Simulate API call
+      // Simulate API call for provisioning codes
       await new Promise((resolve) => setTimeout(resolve, 2000));
       // Validate form
       if (!selectedCustomer) {
@@ -142,12 +102,12 @@ export default function ProvisionCodes() {
     }
   };
 
-  if (authLoading || loading) {
+  if (loading) {
     return <Loading />;
   }
 
-  if (error && !isLoading) {
-    return <Error message={error} />;
+  if (fetchError || error) {
+    return <Error message={fetchError || error || "Error Loading Customers"} />;
   }
 
   if (success) {
@@ -217,7 +177,7 @@ export default function ProvisionCodes() {
                 Select Customer <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <FaSearch className="absolute left-3 top-1/4  h-5 w-5 text-gray-400" />
+                <FaSearch className="absolute left-3 top-1/4 h-5 w-5 text-gray-400" />
                 <input
                   type="text"
                   placeholder="Search customers..."
@@ -360,7 +320,7 @@ export default function ProvisionCodes() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {customers.map((customer) => (
+                {transformedCustomers.map((customer) => (
                   <tr key={customer.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
