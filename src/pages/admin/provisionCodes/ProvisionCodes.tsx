@@ -21,11 +21,12 @@ interface Customer {
   email: string;
   currentCodes: number;
   totalPurchased: number;
+  organizationAddress?: string;
 }
 
 export default function ProvisionCodes() {
   const [selectedCustomer, setSelectedCustomer] = useState("");
-  const [quantity, setQuantity] = useState(10);
+  const [quantity, setQuantity] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
@@ -53,8 +54,8 @@ export default function ProvisionCodes() {
   const transformedCustomers: Customer[] = customers.map((customer) => ({
     id: customer.customer_id.toString(),
     name: customer.name,
-    primaryContact: customer.customer_contacts[0]?.name || "Unknown Contact",
-    email: customer.customer_contacts[0]?.email || "No email provided",
+    primaryContact: customer.customer_contacts && customer.customer_contacts[0]?.name || "Unknown Contact",
+    email: customer.customer_contacts &&customer.customer_contacts[0]?.email || "No email provided",
     currentCodes: customer.codes_available,
     totalPurchased: customer.total_codes_ordered,
   }));
@@ -75,8 +76,6 @@ export default function ProvisionCodes() {
     setIsLoading(true);
     setError("");
     try {
-      // Simulate API call for provisioning codes
-      await new Promise((resolve) => setTimeout(resolve, 2000));
       // Validate form
       if (!selectedCustomer) {
         setError("Please select a customer");
@@ -86,13 +85,49 @@ export default function ProvisionCodes() {
         setError("Please enter a valid quantity (1-1000)");
         return;
       }
+
+      // Prepare API payload
+      const payload = [
+        {
+          idempotency_key: `order-${new Date().toISOString().split('T')[0]}-cust${selectedCustomer}`,
+          customer: {
+            id: parseInt(selectedCustomer),
+            create: false,
+            customer_type: "B2B",
+            address: selectedCustomerData?.organizationAddress || "123 Main St, Denver CO",
+            status: "active",
+            low_inventory_threshold: 10,
+          },
+          order: {
+            dispense_type: "self_dispense",
+            order_received_date: new Date().toISOString().split('T')[0],
+            codes_send_date: null,
+            number_of_codes: quantity,
+          },
+        },
+      ];
+
+      // Make API call
+      const response = await fetch("https://api.dev.cdf.otsuka-oph.org/portal/admin/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        console.log("response", response);
+        }
+
       // Success
       setSuccess(true);
       // Reset form after 3 seconds
       setTimeout(() => {
         setSuccess(false);
         setSelectedCustomer("");
-        setQuantity(10);
+        setQuantity(0);
       }, 3000);
     } catch (err) {
       setError("Failed to provision codes. Please try again.");
@@ -236,7 +271,7 @@ export default function ProvisionCodes() {
                 max="1000"
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                value={quantity}
+                value={quantity || ""}
                 onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
               />
               <p className="text-xs text-gray-500 mt-1">
@@ -277,7 +312,7 @@ export default function ProvisionCodes() {
               </span>
               <button
                 type="submit"
-                disabled={isLoading || !selectedCustomer}
+                disabled={isLoading || !selectedCustomer || quantity <= 0}
                 className="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (

@@ -175,6 +175,7 @@ export interface CommonHeaderProps {
 }
 
 export interface Customer {
+  id?: string;
   customer_id: number;
   name: string;
   customer_type: string;
@@ -183,9 +184,9 @@ export interface Customer {
   total_codes_ordered: number;
   codes_utilized: number;
   codes_available: number;
-  customer_contacts: any[];
+  customer_contacts?: any[];
   user_count: number;
   created_at: string;
   status?: string;
-  totalCodes?: string;
+  totalCodes?: number;
 }
