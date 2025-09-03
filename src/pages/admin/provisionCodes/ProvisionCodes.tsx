@@ -19,9 +19,11 @@ interface Customer {
   name: string;
   primaryContact: string;
   email: string;
+  phoneNumber: string; // Added phoneNumber to the interface
   currentCodes: number;
   totalPurchased: number;
   organizationAddress?: string;
+  customer_contacts?: any[];
 }
 
 export default function ProvisionCodes() {
@@ -54,8 +56,18 @@ export default function ProvisionCodes() {
   const transformedCustomers: Customer[] = customers.map((customer) => ({
     id: customer.customer_id.toString(),
     name: customer.name,
-    primaryContact: customer.customer_contacts && customer.customer_contacts[0]?.name || "Unknown Contact",
-    email: customer.customer_contacts &&customer.customer_contacts[0]?.email || "No email provided",
+    primaryContact:
+      customer.customer_contacts && customer.customer_contacts.length > 0
+        ? `${customer.customer_contacts[0].first_name} ${customer.customer_contacts[0].last_name}`
+        : "Unknown Contact",
+    email:
+      customer.customer_contacts  && customer.customer_contacts.length > 0
+        ? customer.customer_contacts[0].email
+        : "No email provided",
+    phoneNumber:
+      customer.customer_contacts && customer.customer_contacts.length > 0
+        ? customer.customer_contacts[0].phone_number
+        : "No phone number provided",
     currentCodes: customer.codes_available,
     totalPurchased: customer.total_codes_ordered,
   }));
@@ -96,7 +108,7 @@ export default function ProvisionCodes() {
             customer_type: "B2B",
             address: selectedCustomerData?.organizationAddress || "123 Main St, Denver CO",
             status: "active",
-            low_inventory_threshold: 10,
+            // low_inventory_threshold: 10,
           },
           order: {
             dispense_type: "self_dispense",
@@ -108,7 +120,7 @@ export default function ProvisionCodes() {
       ];
 
       // Make API call
-      const response = await fetch("https://api.dev.cdf.otsuka-oph.org/portal/admin/orders", {
+      const response = await fetch( `${import.meta.env.VITE_API_BASE_URL}portal/admin/orders`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -118,8 +130,10 @@ export default function ProvisionCodes() {
       });
 
       if (!response.ok) {
-        console.log("response", response);
-        }
+        const errorData = await response.json();
+       console.log("Error response data:", errorData);
+       
+      }
 
       // Success
       setSuccess(true);
@@ -131,7 +145,7 @@ export default function ProvisionCodes() {
       }, 3000);
     } catch (err) {
       setError("Failed to provision codes. Please try again.");
-      console.log("err", err);
+      console.error("Error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -241,7 +255,10 @@ export default function ProvisionCodes() {
                           ID: {customer.id}
                         </p>
                         <p className="text-xs text-gray-500">
-                          Contact: {customer.primaryContact}
+                          Contact: {customer.phoneNumber}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Email: {customer.email}
                         </p>
                       </div>
                       <div className="text-right">
@@ -291,6 +308,12 @@ export default function ProvisionCodes() {
                   <p>
                     <strong>Contact:</strong>{" "}
                     {selectedCustomerData.primaryContact}
+                  </p>
+                  <p>
+                    <strong>Email:</strong> {selectedCustomerData.email}
+                  </p>
+                  <p>
+                    <strong>Phone:</strong> {selectedCustomerData.phoneNumber}
                   </p>
                   <p>
                     <strong>Current Codes:</strong>{" "}
@@ -374,6 +397,9 @@ export default function ProvisionCodes() {
                         </div>
                         <div className="text-sm text-gray-500">
                           {customer.email}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {customer.phoneNumber}
                         </div>
                       </div>
                     </td>

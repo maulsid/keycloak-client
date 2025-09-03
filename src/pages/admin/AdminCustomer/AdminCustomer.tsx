@@ -14,10 +14,11 @@ import {
   setStatusFilter,
 } from "../../../redux/slices/customerSlice";
 import { useAuth } from "../../../context/CognitoAuth";
-import type { RootState, AppDispatch } from "../../../redux/store"; // Import AppDispatch
+import type { RootState } from "../../../redux/store";
+import type { AppDispatch } from "../../../redux/redux-hooks";
 
 export default function AdminCustomers() {
-  const dispatch = useDispatch<AppDispatch>(); // Use typed dispatch
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { token } = useAuth();
   const {
@@ -39,6 +40,26 @@ export default function AdminCustomers() {
       });
     }
   }, [dispatch, token]);
+
+  const getStatusBadge = (status: string) => {
+    const statusConfig = {
+      active: { color: 'bg-green-100 text-green-800', text: 'Active' },
+      pending: { color: 'bg-yellow-100 text-yellow-800', text: 'Pending' },
+      inactive: { color: 'bg-gray-100 text-gray-800', text: 'Inactive' },
+    };
+    const config = statusConfig[status?.toLowerCase() as keyof typeof statusConfig] || statusConfig.inactive;
+    return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>{config.text}</span>;
+  };
+
+  const getInvitationStatusBadge = (status: string) => {
+    const statusConfig = {
+      registered: { color: 'bg-green-100 text-green-800', text: 'Registered' },
+      pending: { color: 'bg-yellow-100 text-yellow-800', text: 'Pending' },
+      expired: { color: 'bg-red-100 text-red-800', text: 'Expired' },
+    };
+    const config = statusConfig[status?.toLowerCase() as keyof typeof statusConfig] || statusConfig.pending;
+    return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>{config.text}</span>;
+  };
 
   const handleView = (customerId: number) => {
     navigate(`/admin/customers/${customerId}`);
@@ -76,6 +97,8 @@ export default function AdminCustomers() {
         />
         <CustomerTable
           customers={filteredCustomers}
+          getStatusBadge={getStatusBadge}
+          getInvitationStatusBadge={getInvitationStatusBadge}
           onView={handleView}
           onEdit={handleEdit}
         />

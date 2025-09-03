@@ -1,18 +1,20 @@
 import { Link } from "react-router-dom";
 import { FaEye, FaEdit, FaKey } from "react-icons/fa";
 import type { Customer } from "../../../types";
+import { truncateUserId } from "../../../utils/helper/helper";
 
 interface CustomerTableProps {
   customers: Customer[];
-  // getStatusBadge: (status: string) => React.ReactNode;
-  // getInvitationStatusBadge: (status: string) => React.ReactNode;
+  getStatusBadge: (status: string) => React.ReactNode;
+  getInvitationStatusBadge: (status: string) => React.ReactNode;
   onView?: (customerId: number) => void;
   onEdit?: (customerId: number) => void;
 }
 
 export function CustomerTable({
   customers,
-  //getStatusBadge, getInvitationStatusBadge,
+  getStatusBadge,
+  // getInvitationStatusBadge,
   onView,
   onEdit,
 }: CustomerTableProps) {
@@ -31,11 +33,10 @@ export function CustomerTable({
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 ID
               </th>
-
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Organization
+                Contact
               </th>
-              {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th> */}
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Type
               </th>
@@ -68,21 +69,26 @@ export function CustomerTable({
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div>
-                    {/* <div className="text-sm text-gray-900">{customer.primaryContact}</div> */}
-                    <div className="flex items-center text-sm text-gray-500">
-                      {customer.organization_id}
+                    <div className="text-sm text-gray-900">{customer.customer_contacts && customer.customer_contacts[0]?.phone_number !==undefined ?  `phone:${customer.customer_contacts[0]?.phone_number}` :''}</div>
+                    <div className="flex items-center text-sm text-gray-500 relative group">
+                      <span className="truncate cursor-pointer ">{truncateUserId(customer.customer_contacts && customer.customer_contacts[0]?.user_id)}</span>
+                      {customer.customer_contacts && customer.customer_contacts[0]?.user_id && (
+                        <div className="absolute hidden group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2 -top-8 left-0 z-10">
+                          {customer.customer_contacts && customer.customer_contacts[0]?.user_id}
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center text-sm text-gray-500">
-                      {customer.organization_name}
+                      {customer.customer_contacts && customer.customer_contacts[0]?.email}
                     </div>
                   </div>
                 </td>
-                {/* <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4 whitespace-nowrap">
                   <div className="space-y-2">
-                    {getStatusBadge(customer.status)}
-                    {getInvitationStatusBadge(customer.invitationStatus)}
+                    {getStatusBadge(customer.customer_contacts && customer.customer_contacts[0]?.status)}
+                    {/* {getInvitationStatusBadge(customer.invitationStatus)} */}
                   </div>
-                </td> */}
+                </td>
                 <td>
                   <div className="text-sm text-gray-900">
                     {customer.customer_type}
