@@ -57,7 +57,7 @@ export default function AdminCustomers() {
       pending: { color: 'bg-yellow-100 text-yellow-800', text: 'Pending' },
       expired: { color: 'bg-red-100 text-red-800', text: 'Expired' },
     };
-    const config = statusConfig[status?.toLowerCase() as keyof typeof statusConfig] || statusConfig.pending;
+    const config = statusConfig[status?.toLowerCase() as keyof typeof statusConfig] || statusConfig.registered;    
     return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>{config.text}</span>;
   };
 

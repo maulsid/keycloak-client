@@ -30,7 +30,7 @@ const decodeJwt = (token: string): IdTokenPayload | null => {
 
 // Callback component
 const Callback: React.FC = () => {
-  const { isAuthenticated, token } = useAuth();
+  const { isAuthenticated, token ,logout} = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,7 +49,8 @@ const Callback: React.FC = () => {
           navigate("/admin/dashboard");
         } else if (role.includes("customer")) {
           navigate("/customer/dashboard");
-        } else {
+        } else {  
+          logout();
           console.error("User has no recognized role");
           navigate("/login");
         }

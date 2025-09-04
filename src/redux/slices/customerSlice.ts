@@ -24,44 +24,7 @@ const initialState: CustomerState = {
   error: null,
 };
 
-const fallbackCustomers: Customer[] = [
-  {
-    customer_id: 1,
-    name: "Acme Corp",
-    customer_type: "B2B",
-    organization_id: null,
-    organization_name: null,
-    total_codes_ordered: 10,
-    codes_utilized: 5,
-    codes_available: 5,
-    user_count: 0,
-    created_at: "2025-01-01T12:00:00.000Z",
-  },
-  {
-    customer_id: 2,
-    name: "Global Inc",
-    customer_type: "B2B",
-    organization_id: null,
-    organization_name: null,
-    total_codes_ordered: 20,
-    codes_utilized: 15,
-    codes_available: 5,
-    user_count: 0,
-    created_at: "2025-01-02T12:00:00.000Z",
-  },
-  {
-    customer_id: 3,
-    name: "Tech Solutions",
-    customer_type: "B2C",
-    organization_id: null,
-    organization_name: null,
-    total_codes_ordered: 30,
-    codes_utilized: 30,
-    codes_available: 0,
-    user_count: 0,
-    created_at: "2025-01-03T12:00:00.000Z",
-  },
-];
+
 
 export const fetchCustomersThunk = createAsyncThunk<
   Customer[],
@@ -107,27 +70,34 @@ const customersSlice = createSlice({
     },
     setStatusFilter: (state, action: { payload: string }) => {
       state.statusFilter = action.payload;
-      state.filteredCustomers = state.customers.filter(
-        (customer) =>
-          customer.name
-            .toLowerCase()
-            .includes(state.searchTerm.toLowerCase()) ||
-          customer.customer_id
-            .toString()
-            .toLowerCase()
-            .includes(state.searchTerm.toLowerCase()) ||
-          (customer.organization_name?.toLowerCase() || "").includes(
-            state.searchTerm.toLowerCase(),
-          ),
-      );
+      state.currentPage = 1;
+
+      // Start with all customers
+      state.filteredCustomers = state.customers;
+
+      // Apply search term filter
+      if (state.searchTerm) {
+        state.filteredCustomers = state.filteredCustomers.filter(
+          (customer) =>
+            customer.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+            customer.customer_id
+              .toString()
+              .toLowerCase()
+              .includes(state.searchTerm.toLowerCase()) ||
+            (customer.organization_name?.toLowerCase() || "").includes(
+              state.searchTerm.toLowerCase()
+            )
+        );
+      }
+
+      // Apply status filter (based on customer_contacts[0]?.status)
       if (action.payload !== "all") {
         state.filteredCustomers = state.filteredCustomers.filter(
           (customer) =>
-            customer.customer_type.toLowerCase() ===
-            state.statusFilter.toLowerCase(),
+            customer.customer_contacts &&
+            customer.customer_contacts[0]?.status?.toLowerCase() === action.payload.toLowerCase()
         );
       }
-      state.currentPage = 1;
     },
     setCurrentPage: (state, action: { payload: number }) => {
       state.currentPage = action.payload;
@@ -149,12 +119,8 @@ const customersSlice = createSlice({
         fetchCustomersThunk.fulfilled,
         (state, action: { payload: Customer[] }) => {
           state.loading = false;
-          state.customers = action.payload.length
-            ? action.payload
-            : fallbackCustomers;
-          state.filteredCustomers = action.payload.length
-            ? action.payload
-            : fallbackCustomers;
+          state.customers = action.payload
+          state.filteredCustomers = action.payload
           if (state.searchTerm) {
             state.filteredCustomers = state.filteredCustomers.filter(
               (customer) =>
@@ -185,8 +151,8 @@ const customersSlice = createSlice({
           state.loading = false;
           state.error =
             action.payload || "Unable to fetch data. Using fallback data.";
-          state.customers = fallbackCustomers;
-          state.filteredCustomers = fallbackCustomers;
+          state.customers = [];
+          state.filteredCustomers = [];
         },
       );
   },

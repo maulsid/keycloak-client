@@ -189,4 +189,5 @@ export interface Customer {
   created_at: string;
   status?: string;
   totalCodes?: number;
+  organization_address: string | null;
 }
