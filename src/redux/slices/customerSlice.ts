@@ -90,12 +90,10 @@ const customersSlice = createSlice({
         );
       }
 
-      // Apply status filter (based on customer_contacts[0]?.status)
       if (action.payload !== "all") {
         state.filteredCustomers = state.filteredCustomers.filter(
           (customer) =>
-            customer.customer_contacts &&
-            customer.customer_contacts[0]?.status?.toLowerCase() === action.payload.toLowerCase()
+            customer.customer_status.toLowerCase() === action.payload.toLowerCase()
         );
       }
     },

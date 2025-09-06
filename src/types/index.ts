@@ -1,5 +1,8 @@
 import type { FC, JSX, SVGProps } from "react";
 
+export interface AssignUser{
+  id: number | string;
+}
 export interface User {
   id: number;
   firstName: string;
@@ -159,10 +162,8 @@ export interface AccessCode {
   id: string;
   code: string;
   status: string;
-  patientId?: string;
-  patientName?: string;
-  utilizationDate?: string;
-  assignedDate?: string;
+  order_id?: string;
+  orderId?: string;
 }
 export interface CommonHeaderProps {
   title: string;
@@ -172,11 +173,13 @@ export interface CommonHeaderProps {
   isSettings?: boolean;
   isAddCustomer?: boolean;
   backLink?: string;
+  isAssignCodeInfo?: boolean;
 }
 
 export interface Customer {
   id?: string;
   customer_id: number;
+  customer_status: string;
   name: string;
   customer_type: string;
   organization_id: number | null;
@@ -191,3 +194,21 @@ export interface Customer {
   totalCodes?: number;
   organization_address: string | null;
 }
+
+export interface AssignCodeForm {
+  patientFirstName: string;
+  patientMobile: string;
+  selectedCode: string;
+}
+
+export interface AccessCode {
+  id: string;
+  code: string;
+  status: string;
+  patientId?: string;
+  patientName?: string;
+  utilizationDate?: string;
+  assignedDate?: string;
+}
+
+

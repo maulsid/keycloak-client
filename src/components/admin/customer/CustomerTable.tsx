@@ -30,9 +30,9 @@ export function CustomerTable({
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Customer
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 ID
-              </th>
+              </th> */}
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Contact
               </th>
@@ -69,11 +69,11 @@ export function CustomerTable({
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                {/* <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">
                     {customer.customer_id}
                   </div>
-                </td>
+                </td> */}
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div>
                     <div className="text-sm text-gray-900">{customer.customer_contacts && customer.customer_contacts[0]?.phone_number !== undefined ? `phone:${customer.customer_contacts[0]?.phone_number}` : ''}</div>
@@ -92,8 +92,8 @@ export function CustomerTable({
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="space-y-2">
-                    {getStatusBadge(customer.customer_contacts && customer.customer_contacts[0]?.status)}
-                    {getInvitationStatusBadge(customer.customer_contacts && customer.customer_contacts[0]?.status || "Registered")}
+                    {getStatusBadge(customer.customer_status)}
+                    {getInvitationStatusBadge(customer.customer_status|| "Registered")}
                   </div>
                 </td>
                 <td>

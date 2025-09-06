@@ -1,20 +1,21 @@
 import { useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../../redux/redux-hooks";
+import { useAppDispatch, useAppSelector } from "../../../redux/redux-hooks";
 import {
   fetchCodesThunk,
   setSearchTerm,
   setStatusFilter,
   setCurrentPage,
-} from "../../redux/slices/codeSlice";
-import AceesCodeFilterBar from "../../components/customer/accessCode/AccessCodeFilterBar";
-import AccessCodeStatCard from "../../components/customer/accessCode/AccessCodeStatCard";
-import AccessCodeEmptyState from "../../components/customer/accessCode/AccessCodeEmptyState";
-import AccessCodeRow from "../../components/customer/accessCode/AccessCodeRow";
-import type { AccessCode } from "../../types";
-import Header from "../../components/common/Header";
-import { Loading } from "../../components/common/Loading";
-import { Error } from "../../components/common/Error";
-import { useAuth } from "../../context/CognitoAuth";
+} from "../../../redux/slices/codeSlice";
+import AceesCodeFilterBar from "../../../components/customer/accessCode/AccessCodeFilterBar";
+import AccessCodeStatCard from "../../../components/customer/accessCode/AccessCodeStatCard";
+import AccessCodeEmptyState from "../../../components/customer/accessCode/AccessCodeEmptyState";
+import AccessCodeRow from "../../../components/customer/accessCode/AccessCodeRow";
+import type { AccessCode } from "../../../types";
+import Header from "../../../components/common/Header";
+import { Loading } from "../../../components/common/Loading";
+import { Error } from "../../../components/common/Error";
+import { useAuth } from "../../../context/CognitoAuth";
+import { FaCode, FaCheckCircle, FaCircle } from "react-icons/fa";
 
 const AccessCodes: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -44,10 +45,7 @@ const AccessCodes: React.FC = () => {
     id: code.code_id.toString(),
     code: code.code,
     status: code.status || "available",
-    patientId: code.order_id ? code.order_id.toString() : undefined,
-    patientName: code.order_id ? `Patient ${code.order_id}` : undefined, // Mock patient name
-    utilizationDate: code.status === "assigned" ? "2024-01-15" : undefined, // Mock data
-    assignedDate: code.status === "assigned" ? "2024-01-10" : undefined, // Mock data
+    orderId: code.order_id ? code.order_id.toString() : undefined,
   }));
 
   // Pagination logic
@@ -71,64 +69,19 @@ const AccessCodes: React.FC = () => {
     {
       title: "Total Codes",
       value: mappedCodes.length,
-      icon: (
-        <svg
-          className="h-8 w-8"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M15 7a2 2 0 012 2m4 0a6 6 0 01-12 0 6 6 0 0112 0z"
-          />
-        </svg>
-      ),
+      icon: <FaCode className="h-8 w-8" />,
       iconColor: "text-blue-500",
     },
     {
       title: "Utilized",
       value: mappedCodes.filter((code) => code.status === "utilized").length,
-      icon: (
-        <svg
-          className="h-8 w-8"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
-      ),
+      icon: <FaCheckCircle className="h-8 w-8" />,
       iconColor: "text-cyan-500",
     },
     {
       title: "Available",
       value: mappedCodes.filter((code) => code.status === "available").length,
-      icon: (
-        <svg
-          className="h-8 w-8"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
-      ),
+      icon: <FaCircle className="h-8 w-8" />,
       iconColor: "text-gray-600",
     },
   ];
@@ -170,16 +123,7 @@ const AccessCodes: React.FC = () => {
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Patient ID
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Patient Name
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Utilization Date
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Assigned Date
+                    Order ID
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions

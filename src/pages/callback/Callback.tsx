@@ -47,7 +47,7 @@ const Callback: React.FC = () => {
 
         if (role.includes("admin")) {
           navigate("/admin/dashboard");
-        } else if (role.includes("customer")) {
+        } else if (role.includes("hcp")) {
           navigate("/customer/dashboard");
         } else {  
           logout();

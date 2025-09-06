@@ -11,6 +11,7 @@ const Header: React.FC<CommonHeaderProps> = ({
   isSettings = false,
   isAddCustomer = false,
   backLink = "/customer/dashboard",
+  isAssignCodeInfo = false,
 }) => {
   const { logout } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -45,7 +46,11 @@ const Header: React.FC<CommonHeaderProps> = ({
                 </svg>
               </Link>
             )}
-            <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+            <div className="flex flex-col">
+              <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+              {isAssignCodeInfo && <p className="text-sm text-gray-500">Assign an access code to a patient and send via SMS</p>
+              }
+            </div>
           </div>
           <div className="flex items-center space-x-4">
             {primaryContact && (
