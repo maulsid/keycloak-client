@@ -142,7 +142,7 @@ export default function ProvisionCodes() {
         setSuccess(false);
         setSelectedCustomer("");
         setQuantity(0);
-      }, 3000);
+      }, 0);
     } catch (err) {
       setError("Failed to provision codes. Please try again.");
       console.error("Error:", err);
