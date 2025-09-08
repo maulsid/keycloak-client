@@ -112,7 +112,7 @@ export default function ProvisionCodes() {
           },
           order: {
             dispense_type: "self_dispense",
-            order_received_date: new Date().toISOString(), // Includes date and timestamp
+            order_received_date: new Date().toISOString().split('T')[0],
             codes_send_date: null,
             number_of_codes: quantity,
           },
