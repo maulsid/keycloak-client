@@ -47,55 +47,32 @@ const customersSlice = createSlice({
   initialState,
   reducers: {
     setSearchTerm: (state, action: { payload: string }) => {
-      state.searchTerm = action.payload;
-      state.filteredCustomers = state.customers.filter(
-        (customer) =>
-          customer.name.toLowerCase().includes(action.payload.toLowerCase()) ||
-          customer.customer_id
-            .toString()
-            .toLowerCase()
-            .includes(action.payload.toLowerCase()) ||
-          (customer.organization_name?.toLowerCase() || "").includes(
-            action.payload.toLowerCase(),
-          ),
-      );
-      if (state.statusFilter !== "all") {
-        state.filteredCustomers = state.filteredCustomers.filter(
-          (customer) =>
-            customer.customer_type.toLowerCase() ===
-            state.statusFilter.toLowerCase(),
-        );
-      }
+      state.searchTerm = action.payload.toLowerCase();
       state.currentPage = 1;
+      state.filteredCustomers = state.customers.filter((customer) => {
+        const matchesSearch =
+          customer.name.toLowerCase().includes(state.searchTerm) ||
+          customer.customer_id.toString().toLowerCase().includes(state.searchTerm) ||
+          (customer.organization_name?.toLowerCase() || "").includes(state.searchTerm);
+        const matchesStatus =
+          state.statusFilter === "all" ||
+          customer.customer_status.toLowerCase() === state.statusFilter.toLowerCase();
+        return matchesSearch && matchesStatus;
+      });
     },
     setStatusFilter: (state, action: { payload: string }) => {
-      state.statusFilter = action.payload;
+      state.statusFilter = action.payload.toLowerCase();
       state.currentPage = 1;
-
-      // Start with all customers
-      state.filteredCustomers = state.customers;
-
-      // Apply search term filter
-      if (state.searchTerm) {
-        state.filteredCustomers = state.filteredCustomers.filter(
-          (customer) =>
-            customer.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
-            customer.customer_id
-              .toString()
-              .toLowerCase()
-              .includes(state.searchTerm.toLowerCase()) ||
-            (customer.organization_name?.toLowerCase() || "").includes(
-              state.searchTerm.toLowerCase()
-            )
-        );
-      }
-
-      if (action.payload !== "all") {
-        state.filteredCustomers = state.filteredCustomers.filter(
-          (customer) =>
-            customer.customer_status.toLowerCase() === action.payload.toLowerCase()
-        );
-      }
+      state.filteredCustomers = state.customers.filter((customer) => {
+        const matchesSearch =
+          customer.name.toLowerCase().includes(state.searchTerm) ||
+          customer.customer_id.toString().toLowerCase().includes(state.searchTerm) ||
+          (customer.organization_name?.toLowerCase() || "").includes(state.searchTerm);
+        const matchesStatus =
+          action.payload === "all" ||
+          customer.customer_status.toLowerCase() === action.payload.toLowerCase();
+        return matchesSearch && matchesStatus;
+      });
     },
     setCurrentPage: (state, action: { payload: number }) => {
       state.currentPage = action.payload;
@@ -113,46 +90,26 @@ const customersSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(
-        fetchCustomersThunk.fulfilled,
-        (state, action: { payload: Customer[] }) => {
-          state.loading = false;
-          state.customers = action.payload
-          state.filteredCustomers = action.payload
-          if (state.searchTerm) {
-            state.filteredCustomers = state.filteredCustomers.filter(
-              (customer) =>
-                customer.name
-                  .toLowerCase()
-                  .includes(state.searchTerm.toLowerCase()) ||
-                customer.customer_id
-                  .toString()
-                  .toLowerCase()
-                  .includes(state.searchTerm.toLowerCase()) ||
-                (customer.organization_name?.toLowerCase() || "").includes(
-                  state.searchTerm.toLowerCase(),
-                ),
-            );
-          }
-          if (state.statusFilter !== "all") {
-            state.filteredCustomers = state.filteredCustomers.filter(
-              (customer) =>
-                customer.customer_type.toLowerCase() ===
-                state.statusFilter.toLowerCase(),
-            );
-          }
-        },
-      )
-      .addCase(
-        fetchCustomersThunk.rejected,
-        (state, action: { payload: string | undefined }) => {
-          state.loading = false;
-          state.error =
-            action.payload || "Unable to fetch data. Using fallback data.";
-          state.customers = [];
-          state.filteredCustomers = [];
-        },
-      );
+      .addCase(fetchCustomersThunk.fulfilled, (state, action:{payload:Customer[]}) => {
+        state.loading = false;
+        state.customers = action.payload;
+        state.filteredCustomers = action.payload.filter((customer) => {
+          const matchesSearch =
+            customer.name.toLowerCase().includes(state.searchTerm) ||
+            customer.customer_id.toString().toLowerCase().includes(state.searchTerm) ||
+            (customer.organization_name?.toLowerCase() || "").includes(state.searchTerm);
+          const matchesStatus =
+            state.statusFilter === "all" ||
+            customer.customer_status.toLowerCase() === state.statusFilter.toLowerCase();
+          return matchesSearch && matchesStatus;
+        });
+      })
+      .addCase(fetchCustomersThunk.rejected, (state, action: {payload:string | undefined}) => {
+        state.loading = false;
+        state.error = action.payload || "Unable to fetch data. Using fallback data.";
+        state.customers = [];
+        state.filteredCustomers = [];
+      });
   },
 });
 

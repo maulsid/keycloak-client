@@ -101,7 +101,7 @@ export default function ProvisionCodes() {
       // Prepare API payload
       const payload = [
         {
-          idempotency_key: `order-${new Date().toISOString().split('T')[0]}-cust${selectedCustomer}`,
+          idempotency_key: `order-${new Date().toISOString()}-cust${selectedCustomer}`,
           customer: {
             id: parseInt(selectedCustomer),
             create: false,
@@ -112,7 +112,7 @@ export default function ProvisionCodes() {
           },
           order: {
             dispense_type: "self_dispense",
-            order_received_date: new Date().toISOString().split('T')[0],
+            order_received_date: new Date().toISOString(), // Includes date and timestamp
             codes_send_date: null,
             number_of_codes: quantity,
           },
@@ -120,7 +120,7 @@ export default function ProvisionCodes() {
       ];
 
       // Make API call
-      const response = await fetch( `${import.meta.env.VITE_API_BASE_URL}portal/admin/orders`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}portal/admin/orders`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -131,8 +131,8 @@ export default function ProvisionCodes() {
 
       if (!response.ok) {
         const errorData = await response.json();
-       console.log("Error response data:", errorData);
-       
+        console.log("Error response data:", errorData);
+
       }
 
       // Success
@@ -239,11 +239,10 @@ export default function ProvisionCodes() {
                 {filteredCustomers.map((customer) => (
                   <div
                     key={customer.id}
-                    className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 ${
-                      selectedCustomer === customer.id
+                    className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 ${selectedCustomer === customer.id
                         ? "bg-blue-50 border-blue-200"
                         : ""
-                    }`}
+                      }`}
                     onClick={() => setSelectedCustomer(customer.id)}
                   >
                     <div className="flex items-center justify-between">
