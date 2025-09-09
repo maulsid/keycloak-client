@@ -43,7 +43,8 @@ const Callback: React.FC = () => {
         }
 
         const role = payload["role"] || "";
-        console.log("role", role);
+        const customerId = payload["sub"];
+        console.log("role", customerId,role);
 
         if (role.includes("admin")) {
           navigate("/admin/dashboard");

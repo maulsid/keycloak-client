@@ -9,16 +9,34 @@ import SMSPreview from '../../../components/customer/assignCode/SMSPreview';
 import InfoBox from '../../../components/customer/assignCode/InfoBox';
 import ConfirmationModal from '../../../components/customer/assignCode/ConfirmationModal';
 import { useAppSelector } from "../../../redux/redux-hooks";
+import { useAuth } from '../../../context/CognitoAuth';
+
+// Function to normalize mobile number to +<countrycode><digits> format
+const normalizeMobileNumber = (mobile: string): string => {
+  // Remove all non-digit characters except the leading +
+  let cleaned = mobile.replace(/[^\d+]/g, '');
+  
+  // If no + is present, assume +1 (US country code) as default
+  if (!cleaned.startsWith('+')) {
+    cleaned = `+1${cleaned}`;
+  }
+
+  // Ensure the number is 11 or 12 digits (e.g., +11234567890)
+  const digits = cleaned.replace('+', '');
+  if (digits.length !== 10 && digits.length !== 11) {
+    throw console.log('Invalid mobile number length. Expected 10 or 11 digits.');
+  }
+
+  return cleaned;
+};
 
 const AssignCodePage: React.FC = () => {
   const {
-    filteredCodes,
-    loading,
-    error,
+    loading: initialLoading,
   } = useAppSelector((state) => state.codes);
 
-  // const [user, setUser] = useState<AssignUser | null>({ id: 'mock-user-id' });
-  // const [authLoading, setAuthLoading] = useState(false);
+  const { customerId, token, idToken } = useAuth(); // Access idToken for additional validation
+
   const [formData, setFormData] = useState<AssignCodeForm>({
     patientFirstName: '',
     patientMobile: '',
@@ -30,6 +48,8 @@ const AssignCodePage: React.FC = () => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [availableCodes, setAvailableCodes] = useState<AccessCode[]>([]);
   const [preSelectedCode, setPreSelectedCode] = useState<string | null>(null);
+  const [loading, setLoading] = useState(initialLoading);
+  const [isReady, setIsReady] = useState(false); // New state to wait for customerId
 
   // Handle pre-selected code
   useEffect(() => {
@@ -37,24 +57,49 @@ const AssignCodePage: React.FC = () => {
     setPreSelectedCode(params.get('code'));
   }, []);
 
-  // Map filteredCodes to availableCodes, showing only null or unassigned status
+  // Fetch available codes from API
   useEffect(() => {
-    if (filteredCodes) {
+    const fetchAvailableCodes = async () => {
+      setLoading(true);
       try {
-        const codes = filteredCodes
-          .filter((c: any) => c.status === null || c.status === 'unassigned') // Filter for null or unassigned
-          .map((c: any) => ({
-            id: c.code_id.toString(), // Convert code_id to string to match AccessCode type
-            code: c.code,
-            status: c.status || 'unassigned', // Normalize null to 'unassigned' for consistency
-            assignedDate: new Date().toISOString().split('T')[0], // Placeholder; adjust if you have a date field
-          }));
+        if (!customerId) {
+          setErrorMessage('Unable to retrieve customer ID.');
+          setLoading(false);
+          return;
+        }
+        console.log('Customer ID:', customerId); // Debug log
+
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}portal/hcp/customer/${customerId}/codes/available`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          console.log("API Error:", response);
+          setErrorMessage(`API Error: ${response.status} - ${response.statusText}`);
+          return;
+        }
+
+        // Map the API response to include assignedDate with current date
+        const codes = data.codes?.map((c: any, index: number) => ({
+          id: index.toString(), // Generate a temporary id since code_id is missing
+          code: c.code,
+          status: 'unassigned', // Default status since not provided
+          assignedDate: new Date().toISOString(), // Current date and time (11:14 PM IST, 2025-09-09T17:44:00Z)
+        })) || [];
         setAvailableCodes(codes);
       } catch (err) {
         setErrorMessage('Failed to process available codes.');
+      } finally {
+        setLoading(false);
       }
-    }
-  }, [filteredCodes]);
+    };
+
+    fetchAvailableCodes();
+  }, [customerId, token]);
 
   // Handle pre-selection
   useEffect(() => {
@@ -66,28 +111,62 @@ const AssignCodePage: React.FC = () => {
     }
   }, [preSelectedCode, availableCodes]);
 
+  // Set isReady when customerId and idToken are available
+  useEffect(() => {
+    if (customerId && idToken) {
+      setIsReady(true);
+    }
+  }, [customerId, idToken]);
+
   const handleConfirmSubmit = async () => {
     setIsSubmitting(true);
     setSubmitStatus('idle');
     setShowConfirmation(false);
+
     try {
-      await new Promise((res) => setTimeout(res, 2000));
-      setSubmitStatus('success');
-      setFormData({ patientFirstName: '', patientMobile: '', selectedCode: '' });
-    } catch {
+      // Normalize the patientMobile to ensure it’s in +<digits> format
+      const formattedMobile = normalizeMobileNumber(formData.patientMobile);
+      console.log('Sending payload:', {
+        patientFirstName: formData.patientFirstName,
+        patientMobileNumber: formattedMobile,
+      }); // Debug log
+
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}portal/hcp/codes/${formData?.selectedCode}/assign`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`, // Add token for authentication
+        },
+        body: JSON.stringify({
+          patientFirstName: formData.patientFirstName,
+          patientMobileNumber: formattedMobile, // Use normalized mobile number
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        console.log("API Error:", response.ok, result);
+        setErrorMessage(`API Error: ${response.status} - ${response.statusText}`);
+      } else {
+        setSubmitStatus('success');
+        setFormData({ patientFirstName: '', patientMobile: '', selectedCode: '' });
+      }
+    } catch (error: any) {
       setSubmitStatus('error');
-      setErrorMessage('Failed to assign code. Please try again.');
+      setErrorMessage(error.message || 'An error occurred while assigning the code.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if ( loading) return <Loading />;
-  if (error || errorMessage) return <Error message={error || errorMessage} />;
+  if (!isReady) return <Loading />; // Wait for customerId and idToken
+  if (loading) return <Loading />;
+  if ( errorMessage) return <Error message={errorMessage} />;
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header title="Assign Access Code" backLink="/customer/access-codes" showBackButton isAssignCodeInfo />
+      <Header title="Assign Code" backLink="/customer/access-codes" showBackButton isAssignCodeInfo />
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <SubmitStatusAlert status={submitStatus} errorMessage={errorMessage} formData={formData} />
 

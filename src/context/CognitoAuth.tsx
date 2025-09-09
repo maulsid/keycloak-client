@@ -12,9 +12,10 @@ const COGNITO_CONFIG = {
 // Auth context type
 interface AuthContextType {
   isAuthenticated: boolean;
-  token: string | null;
+  token: string | null; // access_token
   refreshToken: string | null;
   idToken: string | null;
+  customerId: string | null;
   login: () => Promise<void>;
   logout: () => void;
 }
@@ -64,12 +65,28 @@ const decodeCodeVerifier = (encoded: string): string => {
   return atob(encoded.replace(/-/g, "+").replace(/_/g, "/"));
 };
 
-// AuthProvider component
+// Utility to decode customer ID from id_token
+const decodeCustomerIdFromToken = (idToken: string | null): string | null => {
+  if (!idToken) return null;
+  try {
+    console.log("pa", idToken); // Debug log
+    
+    const payload = idToken.split('.')[1];
+    const decoded = JSON.parse(atob(payload));
+    console.log("Decoded JWT Payload:", decoded); // Debug log
+    return decoded.customer_id || null; // Use 'sub' as customerId
+  } catch (error) {
+    console.error("Error decoding id_token:", error);
+    return null;
+  }
+};
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null); // access_token
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [idToken, setIdToken] = useState<string | null>(null);
+  const [customerId, setCustomerId] = useState<string | null>(null);
 
   useEffect(() => {
     // Handle logout redirect
@@ -78,6 +95,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setToken(null);
       setRefreshToken(null);
       setIdToken(null);
+      setCustomerId(null);
       return;
     }
 
@@ -95,6 +113,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setToken(null);
             setRefreshToken(null);
             setIdToken(null);
+            setCustomerId(null);
             return;
           }
 
@@ -118,7 +137,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           );
 
           if (!response.ok) {
-            throw new Error("Token exchange failed");
+            throw new Error(`Token exchange failed: ${response.statusText}`);
           }
 
           const data: TokenResponse = await response.json();
@@ -127,18 +146,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setIdToken(data.id_token);
           setIsAuthenticated(true);
 
+          // Extract customer ID from id_token
+          const decodedCustomerId = decodeCustomerIdFromToken(data.access_token); // Use id_token
+          if (!decodedCustomerId) {
+            console.warn("No customerId found in id_token");
+          }
+          setCustomerId(decodedCustomerId);
+
           // Clear query parameters
-          window.history.replaceState(
-            {},
-            document.title,
-            window.location.pathname,
-          );
+          window.history.replaceState({}, document.title, window.location.pathname);
         } catch (err: unknown) {
           console.error("Token exchange error:", err);
           setIsAuthenticated(false);
           setToken(null);
           setRefreshToken(null);
           setIdToken(null);
+          setCustomerId(null);
         }
       }
     };
@@ -166,19 +189,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           );
 
           if (!response.ok) {
-            throw new Error("Token refresh failed");
+            throw new Error(`Token refresh failed: ${response.statusText}`);
           }
 
           const data: TokenResponse = await response.json();
           setToken(data.access_token);
           setIdToken(data.id_token);
           setIsAuthenticated(true);
+
+          // Extract customer ID from id_token
+          const decodedCustomerId = decodeCustomerIdFromToken(data.access_token); // Use id_token
+          if (!decodedCustomerId) {
+            console.warn("No customerId found in id_token after refresh");
+          }
+          setCustomerId(decodedCustomerId);
         } catch (err: unknown) {
           console.error("Token refresh error:", err);
           setIsAuthenticated(false);
           setToken(null);
           setRefreshToken(null);
           setIdToken(null);
+          setCustomerId(null);
         }
       }
     }, 300000); // Refresh every 5 minutes
@@ -205,6 +236,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setToken(null);
     setRefreshToken(null);
     setIdToken(null);
+    setCustomerId(null);
     const logoutUrl = `${COGNITO_CONFIG.cognitoDomain}/logout?client_id=${
       COGNITO_CONFIG.clientId
     }&logout_uri=${COGNITO_CONFIG.logoutRedirectUri}`;
@@ -213,7 +245,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, token, refreshToken, idToken, login, logout }}
+      value={{ isAuthenticated, token, refreshToken, idToken, customerId, login, logout }}
     >
       {children}
     </AuthContext.Provider>
