@@ -18,6 +18,7 @@ interface AuthContextType {
   customerId: string | null;
   login: () => Promise<void>;
   logout: () => void;
+  signup: () => Promise<void>;
 }
 
 // Token response type
@@ -231,6 +232,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const signup = async (): Promise<void> => {
+    try {
+      const codeVerifier = generateRandomString(128);
+      const codeChallenge = await generateCodeChallenge(codeVerifier);
+      const encodedCodeVerifier = encodeCodeVerifier(codeVerifier);
+
+      // NOTE: /signup shows the sign-up screen of Cognito Hosted UI.
+      const authUrl = `${COGNITO_CONFIG.cognitoDomain}/signup?response_type=code&client_id=${
+        COGNITO_CONFIG.clientId
+      }&redirect_uri=${encodeURIComponent(COGNITO_CONFIG.redirectUri)}&code_challenge=${codeChallenge}&code_challenge_method=S256&state=${encodedCodeVerifier}`;
+
+      window.location.href = authUrl;
+    } catch (err: unknown) {
+      console.error("Error initiating signup:", err);
+    }
+  };
+
   const logout = (): void => {
     setIsAuthenticated(false);
     setToken(null);
@@ -245,7 +263,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, token, refreshToken, idToken, customerId, login, logout }}
+      value={{ isAuthenticated, token, refreshToken, idToken, customerId, login, logout, signup }}
     >
       {children}
     </AuthContext.Provider>

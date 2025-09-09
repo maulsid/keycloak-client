@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FaEye, FaEdit, FaKey } from "react-icons/fa";
+import { FaEye, FaEdit, FaKey, FaUserPlus } from "react-icons/fa";
 import type { Customer } from "../../../types";
 import { truncateUserId } from "../../../utils/helper/helper";
 
@@ -141,6 +141,13 @@ export function CustomerTable({
                     >
                       <FaEdit className="h-5 w-5" />
                     </button>
+                    <Link
+                      to={`/admin/create-customer?organization_id=${customer.organization_id}&customer_id=${customer.customer_id}`}
+                      className="text-indigo-600 hover:text-indigo-900"
+                      title="Invite User"
+                    >
+                      <FaUserPlus className="h-5 w-5" />
+                    </Link>
                     <Link
                       to={`/admin/provision-codes?customer=${customer.customer_id}`}
                       className="text-purple-600 hover:text-purple-900"

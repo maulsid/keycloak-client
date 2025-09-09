@@ -1,15 +1,16 @@
-import { Routes, Route, Outlet } from "react-router-dom";
-import NotFound from "../pages/notFound/NotFound";
+import { Outlet, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "../components/protected/Protected";
-import Login from "../pages/login/Login";
-import AccessCodes from "../pages/customer/accessCode/AccessCode";
-import Callback from "../pages/callback/Callback";
+import AdminCustomers from "../pages/admin/AdminCustomer/AdminCustomer";
 import AdminDashboard from "../pages/admin/AdminDashbaord";
-import CustomerDashboard from "../pages/customer/CustomerDashbaord";
-import AdminCustomers from "../pages/admin/adminCustomer/AdminCustomer";
 import CreateCustomer from "../pages/admin/createCustomer/CreateCustomer";
 import ProvisionCodes from "../pages/admin/provisionCodes/ProvisionCodes";
+import Callback from "../pages/callback/Callback";
+import AccessCodes from "../pages/customer/accessCode/AccessCode";
 import AssignCodePage from "../pages/customer/assigncode/AssignCodePage";
+import CustomerDashboard from "../pages/customer/CustomerDashbaord";
+import Login from "../pages/login/Login";
+import NotFound from "../pages/notFound/NotFound";
+import InviteAcceptPage from "../pages/invite/InviteAcceptPage";
 
 const AppRoutes = () => {
   return (
@@ -18,6 +19,7 @@ const AppRoutes = () => {
       <Route path="/" element={<Login />} />
       <Route path="/callback" element={<Callback />} />
       <Route path="*" element={<NotFound />} />
+      <Route path="/invite/accept" element={<InviteAcceptPage />} />
 
       <Route
         element={

@@ -212,3 +212,35 @@ export interface AccessCode {
 }
 
 
+// ===== Invitations =====
+export interface InviteCreateExistingPayload {
+  organization_id: number;
+  customer_id: number;
+  email: string;
+  ttl_days?: number;
+  role_id?: number;
+}
+export interface InviteCreateNewOrgCustomerPayload {
+  new_organization: { name: string; address?: string };
+  new_customer: { name: string; address?: string; customer_type: "B2B" };
+  email: string;
+  ttl_days?: number;
+  role_id?: number;
+}
+export interface InviteResponse {
+  invite_id: string;
+  invite_link: string;
+  expires_at: string;
+  status: string;
+  organization_id?: number;
+  customer_id?: number;
+}
+
+export interface VerifyInviteResponse {
+  organization_id: number;
+  email: string;
+  role_id: number;
+  expires_at: string; // ISO
+  status: string;
+}
+
