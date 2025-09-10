@@ -7,11 +7,11 @@ import {
 } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { Loading } from "../../../components/common/Loading";
-import { Error } from "../../../components/common/Error";
 import Header from "../../../components/common/Header";
 import { fetchCustomersThunk } from "../../../redux/slices/customerSlice";
 import { useAuth } from "../../../context/CognitoAuth";
 import type { RootState } from "../../../redux/store";
+import { LuTriangleAlert } from "react-icons/lu";
 
 // Define the shape of customer data
 interface Customer {
@@ -19,12 +19,32 @@ interface Customer {
   name: string;
   primaryContact: string;
   email: string;
-  phoneNumber: string; // Added phoneNumber to the interface
+  phoneNumber: string;
   currentCodes: number;
   totalPurchased: number;
   organizationAddress?: string;
   customer_contacts?: any[];
 }
+interface ApiResponse {
+  failed?: { error: string }[];
+  // Add other properties as needed
+}
+// SMSPreview component
+const SMSPreview: React.FC<{ customerName: string; quantity: number }> = ({
+  customerName,
+  quantity,
+}) => {
+  const smsMessage = `Dear ${customerName}, ${quantity} new access codes have been provisioned to your account. Log in to the portal to view and assign them.`;
+
+  return (
+    <div className="bg-gray-100 rounded-lg p-4 mt-6">
+      <h3 className="text-sm font-medium text-gray-900 mb-2">SMS Preview</h3>
+      <div className="bg-white border border-gray-300 rounded-md p-4">
+        <p className="text-sm text-gray-700">{smsMessage}</p>
+      </div>
+    </div>
+  );
+};
 
 export default function ProvisionCodes() {
   const [selectedCustomer, setSelectedCustomer] = useState("");
@@ -61,7 +81,7 @@ export default function ProvisionCodes() {
         ? `${customer.customer_contacts[0].first_name} ${customer.customer_contacts[0].last_name}`
         : "Unknown Contact",
     email:
-      customer.customer_contacts  && customer.customer_contacts.length > 0
+      customer.customer_contacts && customer.customer_contacts.length > 0
         ? customer.customer_contacts[0].email
         : "No email provided",
     phoneNumber:
@@ -83,81 +103,95 @@ export default function ProvisionCodes() {
     (c) => c.id === selectedCustomer,
   );
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError("");
-    try {
-      // Validate form
-      if (!selectedCustomer) {
-        setError("Please select a customer");
-        return;
-      }
-      if (quantity <= 0 || quantity > 1000) {
-        setError("Please enter a valid quantity (1-1000)");
-        return;
-      }
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsLoading(true);
+  setError("");
+  try {
+    // Validate form
+    if (!selectedCustomer) {
+      setError("Please select a customer");
+      return;
+    }
+    if (quantity <= 0 || quantity > 1000) {
+      setError("Please enter a valid quantity (1-1000)");
+      return;
+    }
 
-      // Prepare API payload
-      const payload = [
-        {
-          idempotency_key: `order-${new Date().toISOString()}-cust${selectedCustomer}`,
-          customer: {
-            id: parseInt(selectedCustomer),
-            create: false,
-            customer_type: "B2B",
-            address: selectedCustomerData?.organizationAddress || "123 Main St, Denver CO",
-            status: "active",
-            // low_inventory_threshold: 10,
-          },
-          order: {
-            dispense_type: "self_dispense",
-            order_received_date: new Date().toISOString().split('T')[0],
-            codes_send_date: null,
-            number_of_codes: quantity,
-          },
+    // Prepare API payload
+    const payload = [
+      {
+        idempotency_key: `order-${new Date().toISOString()}-cust${selectedCustomer}`,
+        customer: {
+          id: parseInt(selectedCustomer),
+          create: false,
+          customer_type: "B2B",
+          address: selectedCustomerData?.organizationAddress || "123 Main St, Denver CO",
+          status: "active",
         },
-      ];
+        order: {
+          dispense_type: "self_dispense",
+          order_received_date: new Date().toISOString().split("T")[0],
+          codes_send_date: null,
+          number_of_codes: quantity,
+        },
+      },
+    ];
 
-      // Make API call
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}portal/admin/orders`, {
+    // Make API call
+    const response = await fetch(
+      `${import.meta.env.VITE_API_BASE_URL}portal/admin/orders`,
+      {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
-      });
+      },
+    );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.log("Error response data:", errorData);
+    // Parse the response body
+    const responseData: ApiResponse = await response.json();
 
-      }
-
-      // Success
-      setSuccess(true);
-      // Reset form after 3 seconds
-      setTimeout(() => {
-        setSuccess(false);
-        setSelectedCustomer("");
-        setQuantity(0);
-      }, 0);
-    } catch (err) {
-      setError("Failed to provision codes. Please try again.");
-      console.error("Error:", err);
-    } finally {
-      setIsLoading(false);
+    if (!response.ok) {
+      console.log("Error response data:", responseData);
     }
-  };
+    
+    // Check for failed property in response body
+    if (responseData.failed && responseData.failed.length > 0) {
+      setError(responseData.failed[0].error);
+      setIsLoading(false);
+      return;
+    }
+
+    // Success
+    setSuccess(true);
+    setTimeout(() => {
+      setSuccess(false);
+      setSelectedCustomer("");
+      setQuantity(0);
+    }, 3000);
+
+  } catch (err) {
+    console.error("Error:", err);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   if (loading) {
     return <Loading />;
   }
 
-  if (fetchError || error) {
-    return <Error message={fetchError || error || "Error Loading Customers"} />;
-  }
+  if (fetchError || error) { 
+    return ( 
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+       <div className="text-center"> 
+        <LuTriangleAlert className="h-12 w-12 text-red-500 mx-auto mb-4" />
+         <h2 className="text-xl font-semibold text-gray-900 mb-2">{error}</h2>
+          <p className="text-gray-600">{error}</p> </div> </div> ); 
+          }
 
   if (success) {
     return (
@@ -239,10 +273,11 @@ export default function ProvisionCodes() {
                 {filteredCustomers.map((customer) => (
                   <div
                     key={customer.id}
-                    className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 ${selectedCustomer === customer.id
+                    className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 ${
+                      selectedCustomer === customer.id
                         ? "bg-blue-50 border-blue-200"
                         : ""
-                      }`}
+                    }`}
                     onClick={() => setSelectedCustomer(customer.id)}
                   >
                     <div className="flex items-center justify-between">
@@ -295,6 +330,12 @@ export default function ProvisionCodes() {
                 customer's account.
               </p>
             </div>
+            {selectedCustomerData && quantity > 0 && (
+              <SMSPreview
+                customerName={selectedCustomerData.name}
+                quantity={quantity}
+              />
+            )}
             {selectedCustomerData && (
               <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
                 <h3 className="text-sm font-medium text-blue-900 mb-2">

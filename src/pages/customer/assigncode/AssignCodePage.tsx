@@ -67,8 +67,6 @@ const AssignCodePage: React.FC = () => {
           setLoading(false);
           return;
         }
-        console.log('Customer ID:', customerId); // Debug log
-
         const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}portal/hcp/customer/${customerId}/codes/available`, {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -125,11 +123,7 @@ const AssignCodePage: React.FC = () => {
 
     try {
       // Normalize the patientMobile to ensure it’s in +<digits> format
-      const formattedMobile = normalizeMobileNumber(formData.patientMobile);
-      console.log('Sending payload:', {
-        patientFirstName: formData.patientFirstName,
-        patientMobileNumber: formattedMobile,
-      }); // Debug log
+      const formattedMobile = normalizeMobileNumber(formData.patientMobile)
 
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}portal/hcp/codes/${formData?.selectedCode}/assign`, {
         method: 'POST',
