@@ -28,6 +28,10 @@ interface Customer {
 }
 interface ApiResponse {
   failed?: { error: string }[];
+  processed?: {
+    customer_name: string;
+    processed_count: number;
+  }[];
   // Add other properties as needed
 }
 
@@ -106,65 +110,76 @@ export default function ProvisionCodes() {
     (c) => c.id === selectedCustomer
   );
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError("");
-    try {
-      // Validate form
-      if (!selectedCustomer) {
-        setError("Please select a customer");
-        setIsLoading(false);
-        return;
-      }
-      if (quantity <= 0 || quantity > 1000) {
-        setError("Please enter a valid quantity (1-1000)");
-        setIsLoading(false);
-        return;
-      }
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsLoading(true);
+  setError("");
+  try {
+    // Validate form
+    if (!selectedCustomer) {
+      setError("Please select a customer");
+      setIsLoading(false);
+      return;
+    }
+    if (quantity <= 0 || quantity > 1000) {
+      setError("Please enter a valid quantity (1-1000)");
+      setIsLoading(false);
+      return;
+    }
 
-      // Prepare API payload
-      const payload = [
-        {
-          idempotency_key: `order-${new Date().toISOString()}-cust${selectedCustomer}`,
-          customer: {
-            id: parseInt(selectedCustomer),
-            create: false,
-            customer_type: "B2B",
-            address: selectedCustomerData?.organizationAddress || "123 Main St, Denver CO",
-            status: "active",
-          },
-          order: {
-            dispense_type: "self_dispense",
-            order_received_date: new Date().toISOString().split("T")[0],
-            codes_send_date: null,
-            number_of_codes: quantity,
-          },
+    // Prepare API payload
+    const payload = [
+      {
+        idempotency_key: `order-${new Date().toISOString()}-cust${selectedCustomer}`,
+        customer: {
+          id: parseInt(selectedCustomer),
+          create: false,
+          customer_type: "B2B",
+          address: selectedCustomerData?.organizationAddress || "123 Main St, Denver CO",
+          status: "active",
         },
-      ];
+        order: {
+          dispense_type: "self_dispense",
+          order_received_date: new Date().toISOString().split("T")[0],
+          codes_send_date: null,
+          number_of_codes: quantity,
+        },
+      },
+    ];
 
-      // Make API call
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}portal/admin/orders`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(payload),
-        }
+    // Make API call
+    const response = await fetch(
+      `${import.meta.env.VITE_API_BASE_URL}portal/admin/orders`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    const responseData: ApiResponse = await response.json();
+
+    if (!response.ok || (responseData.failed && responseData.failed.length > 0)) {
+      console.log("Error response data:", responseData);
+      setError(
+        responseData.failed && responseData.failed.length > 0
+          ? responseData.failed[0].error
+          : "Failed to provision codes"
       );
+      setIsLoading(false);
+      return;
+    }
 
-      const responseData: ApiResponse = await response.json();
-
-      if (!response.ok) {
-        console.log("Error response data:", responseData);
-        if (responseData.failed && responseData.failed.length > 0) {
-          setError(responseData.failed[0].error);
-        } else {
-          setError("Failed to provision codes");
-        }
+    // Map successful response
+    const processedOrder = responseData.processed?.[0];
+    if (processedOrder) {
+      // Verify customer name matches
+      if (processedOrder.customer_name !== selectedCustomerData?.name) {
+        console.warn("Customer name mismatch in API response");
+        setError("Customer name in response does not match selected customer");
         setIsLoading(false);
         return;
       }
@@ -174,24 +189,24 @@ export default function ProvisionCodes() {
         type: "customers/updateCustomerCodes",
         payload: {
           customerId: selectedCustomer,
-          newCodes: quantity,
+          newCodes: processedOrder.processed_count, // Use processed_count from API
         },
       });
 
-      // Success
+      // Set quantity from API response to ensure consistency
+      setQuantity(processedOrder.processed_count);
       setSuccess(true);
       setIsLoading(false);
-      // Do NOT reset selectedCustomer to keep selectedCustomerData available
-      // setSelectedCustomer("");
-      // Reset quantity to allow new input after success
-      setQuantity(quantity);
-
-    } catch (err) {
-      console.error("Error:", err);
-      setError("An unexpected error occurred");
+    } else {
+      setError("No processed orders found in response");
       setIsLoading(false);
     }
-  };
+  } catch (err) {
+    console.error("Error:", err);
+    setError("An unexpected error occurred");
+    setIsLoading(false);
+  }
+};
 
   if (loading) {
     return <Loading />;
