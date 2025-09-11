@@ -20,7 +20,7 @@ const initialState: CustomerDashboardState = {
   error: null,
 };
 
-// Mock user data (as in the original component)
+// Mock user data
 const user = {
   id: "001",
   companyName: "Medical Center",
@@ -30,16 +30,19 @@ const user = {
   phoneNumber: "555-123-4567",
 };
 
-// Mock fallback data for customer
+// Mock fallback data
 const fallbackCustomerData: CustomerData = {
   customerId: "CUST-001",
   name: "Medical Center",
   primaryContact: "John Doe",
   email: "john.doe@medicalcenter.com",
   phone: "555-123-4567",
-  purchasedCodes: 0,
-  utilizedCodes: 0,
-  availableCodes: 0,
+  totalPurchasedCodes: 0,
+  utilizedCodesCount: 0,
+  availableCodesCount: 0,
+  purchasedCodes: [],
+  utilizedCodes: [],
+  availableCodes: [],
   recentActivity: [
     {
       id: 1,
@@ -66,9 +69,9 @@ const fallbackCustomerData: CustomerData = {
 };
 
 export const fetchCustomerDashboard = createAsyncThunk<
-  { customerData: CustomerData; availableCodes: any[] }, // Returned type
-  FetchCustomerDashboardArgs, // ThunkArg type
-  { rejectValue: string } // ThunkApiConfig
+  { customerData: CustomerData; availableCodes: any[] },
+  FetchCustomerDashboardArgs,
+  { rejectValue: string }
 >(
   "customerDashboard/fetchCustomerDashboard",
   async ({ token, customerId }, { rejectWithValue }) => {
@@ -117,14 +120,19 @@ export const fetchCustomerDashboard = createAsyncThunk<
         assignedDate: new Date().toISOString(),
       })) || [];
 
-      // Combine data
+      // Combine data with explicit type mapping
       const customerData: CustomerData = {
         customerId: `CUST-${customerId}`,
         name: user.companyName,
         primaryContact: `${user.firstName} ${user.lastName}`,
         email: user.email,
         phone: user.phoneNumber,
-        ...statsData,
+        totalPurchasedCodes: statsData.total_codes_purchased || 0,
+        utilizedCodesCount: statsData.codes_utilized || 0,
+        availableCodesCount: statsData.codes_available || 0,
+        purchasedCodes: statsData.total_codes_purchased ? Array(statsData.total_codes_purchased).fill(null) : [], // Placeholder array
+        utilizedCodes: statsData.codes_utilized ? Array(statsData.codes_utilized).fill(null) : [], // Placeholder array
+        availableCodes: codes, // Array of code objects
         recentActivity: [
           {
             id: 1,

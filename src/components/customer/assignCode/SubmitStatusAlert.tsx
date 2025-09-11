@@ -13,6 +13,8 @@ const SubmitStatusAlert: React.FC<SubmitStatusAlertProps> = ({
   errorMessage,
   formData,
 }) => {
+  console.log("status", formData);
+  
   if (status === "success") {
     return (
       <div className="mb-6 bg-green-50 border border-green-200 rounded-md p-4">

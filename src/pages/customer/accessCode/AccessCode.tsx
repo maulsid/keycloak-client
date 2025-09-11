@@ -77,13 +77,13 @@ const AccessCodes: React.FC = () => {
     },
     {
       title: "Utilized",
-      value: mappedCodes.filter((code) => code.status === "utilized").length,
+      value: mappedCodes.filter((code) => code.status !== "utilized").length,
       icon: <FaCheckCircle className="h-8 w-8" />,
       iconColor: "text-cyan-500",
     },
     {
       title: "Available",
-      value: mappedCodes.filter((code) => code.status === "available").length,
+      value: mappedCodes.filter((code) => code.status !=='assigned').length,
       icon: <FaCircle className="h-8 w-8" />,
       iconColor: "text-gray-600",
     },

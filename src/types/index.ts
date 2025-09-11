@@ -92,9 +92,17 @@ export interface CustomerData {
   primaryContact: string;
   email: string;
   phone: string;
-  purchasedCodes: number;
-  utilizedCodes: number;
-  availableCodes: number;
+  totalPurchasedCodes: number; // Renamed to match the code's mappedStats
+  utilizedCodesCount: number; // Renamed to match the code's mappedStats
+  availableCodesCount: number; // Renamed to match the code's mappedStats
+  purchasedCodes: Array<any> | number[]; // Array for detailed codes or number if summary
+  utilizedCodes: Array<any> | number[]; // Array for detailed codes or number if summary
+  availableCodes: Array<{
+    id: string;
+    code: string;
+    status: string;
+    assignedDate: string;
+  }>; // Array of code objects as mapped in the code
   recentActivity: Array<{
     id: number;
     action: string;
