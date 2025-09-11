@@ -28,25 +28,27 @@ const AccessCodes: React.FC = () => {
     loading,
     error,
   } = useAppSelector((state) => state.codes);
-  const { token } = useAuth();
+  const { token, customerId } = useAuth();
+
   useEffect(() => {
-    if (token) {
-      dispatch(fetchCodesThunk(token));
+    if (token && customerId) {
+      dispatch(fetchCodesThunk({ token, customerId }));
     } else {
       dispatch({
         type: "codes/fetchCodes/rejected",
-        payload: "No authentication token available",
+        payload: "Missing authentication token or customer ID",
       });
     }
-  }, [dispatch, token]);
+  }, [dispatch, token, customerId]);
 
   // Map filteredCodes to match AccessCode type expected by components
+
   const mappedCodes: AccessCode[] = filteredCodes.map((code) => ({
-    id: code.code_id.toString(),
-    code: code.code,
-    status: code.status || "available",
-    orderId: code.order_id ? code.order_id.toString() : undefined,
-  }));
+  id: code.code_id.toString(),
+  code: code.code,
+  status: code.status === "assigned" ? "assigned" : "utilized",
+  orderId: code.order_id ? code.order_id.toString() : undefined,
+}));
 
   // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -65,6 +67,7 @@ const AccessCodes: React.FC = () => {
       <Error message="An error occurred while fetching access codes. Please try again later." />
     );
   }
+
   const statCards = [
     {
       title: "Total Codes",
@@ -88,7 +91,7 @@ const AccessCodes: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header title="Access Code Inventory" showBackButton showActionButtons />{" "}
+      <Header title="Access Code Inventory" showBackButton showActionButtons />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <AceesCodeFilterBar
           searchTerm={searchTerm}
@@ -159,7 +162,7 @@ const AccessCodes: React.FC = () => {
                   >
                     {page}
                   </button>
-                ),
+                )
               )}
             </div>
             <button

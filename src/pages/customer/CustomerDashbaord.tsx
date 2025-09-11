@@ -9,6 +9,7 @@ import Header from "../../components/common/Header";
 import { Loading } from "../../components/common/Loading";
 import { Error } from "../../components/common/Error";
 import CustomerFooter from "../../components/customer/CustomerFooter";
+import { useAuth } from "../../context/CognitoAuth";
 
 // Define user outside the component to ensure a stable reference
 const user = {
@@ -23,23 +24,65 @@ const user = {
 // Main CustomerDashboard Component
 const CustomerDashboard: React.FC = () => {
   const [customerData, setCustomerData] = useState<CustomerData | null>(null);
+  const [availableCodes, setAvailableCodes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const { customerId, token } = useAuth(); // Access auth details
+  console.log("ava",availableCodes);
+  
 
   useEffect(() => {
     const fetchCustomerData = async () => {
       try {
         setLoading(true);
-        // Mock data since apiService is removed
-        const mockData: CustomerData = {
-          customerId: `CUST-${user.id}`,
+
+        // Fetch customer stats based on the curl command
+        const statsResponse = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL}portal/hcp/customers/${customerId}/stats`,{
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+        );
+        const statsData = await statsResponse.json();
+
+        if (!statsResponse.ok) {
+          console.log("stt",statsResponse)
+        }
+
+        // Fetch available codes (using the earlier endpoint structure)
+        const codesResponse = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL}portal/hcp/customers/${customerId}/profile`,{
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          }
+        );
+        const codesData = await codesResponse.json();
+
+        if (!codesResponse.ok) {
+          console.log("cc",codesResponse)
+        }
+
+        // Map the API response for available codes
+        const codes = codesData.codes?.map((c: any, index: number) => ({
+          id: index.toString(),
+          code: c.code,
+          status: "unassigned",
+          assignedDate: new Date().toISOString(),
+        })) || [];
+
+        // Combine data
+        setCustomerData({
+          customerId: `CUST-${customerId}`,
           name: user.companyName,
           primaryContact: `${user.firstName} ${user.lastName}`,
           email: user.email,
           phone: user.phoneNumber,
-          purchasedCodes: 100,
-          utilizedCodes: 60,
-          availableCodes: 40,
+          ...statsData, // Spread stats data (e.g., purchasedCodes, utilizedCodes, availableCodes)
           recentActivity: [
             {
               id: 1,
@@ -63,22 +106,23 @@ const CustomerDashboard: React.FC = () => {
               status: "completed",
             },
           ],
-        };
-        setCustomerData(mockData);
+        });
+        setAvailableCodes(codes);
       } catch (err) {
-        console.error("Error fetching customer data:", err);
-        setError("Failed to load customer data");
+        console.error("Error fetching data:", err);
+        setError("Failed to load customer data or available codes");
       } finally {
         setLoading(false);
       }
     };
 
-    if (user) {
+    if (customerId && token) {
       fetchCustomerData();
     } else {
       setLoading(false);
+      setError("Unable to retrieve customer ID or token");
     }
-  }, []); // Empty dependency array since user is static
+  }, [customerId, token]);
 
   if (loading) {
     return <Loading />;
@@ -102,7 +146,7 @@ const CustomerDashboard: React.FC = () => {
             <CustomerStatCard
               key={index}
               title={card.title}
-              value={card.value(customerData)} // Resolve value function
+              value={card.value(customerData)}
               icon={card.icon}
               iconColor={card.iconColor}
             />

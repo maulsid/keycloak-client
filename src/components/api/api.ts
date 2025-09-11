@@ -1,12 +1,12 @@
 import axios from "axios";
 import type { Code, Customer,  InviteCreateExistingPayload, InviteCreateNewOrgCustomerPayload, InviteResponse,VerifyInviteResponse } from "../../types";
 
-export const fetchCodes = async (token: string | null): Promise<Code[]> => {
+export const fetchCodes = async (token: string | null,customerId:string |number | null): Promise<Code[]> => {
   if (!token) {
     throw new Error("No authentication token provided");
   }
   const response = await axios.get(
-    `${import.meta.env.VITE_API_BASE_URL}portal/admin/codes`,
+    `${import.meta.env.VITE_API_BASE_URL}portal/hcp/customer/${customerId}/codes`,
     {
       headers: {
         Authorization: token ? `Bearer ${token}` : undefined,

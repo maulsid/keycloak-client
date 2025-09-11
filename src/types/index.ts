@@ -51,10 +51,10 @@ export interface AdminActionCardProps {
   iconColor: string;
 }
 export interface Code {
-  code_id: number;
+  code_id?: number;
   code: string;
-  status: "assigned" | "available" | "utilized";
-  order_id: number;
+  status?: "assigned" | "available" | "utilized";
+  order_id?: number;
 }
 
 export interface AdminAlertBannerProps {

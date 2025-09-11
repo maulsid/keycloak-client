@@ -19,6 +19,11 @@ interface CodeState {
   error: string | null;
 }
 
+interface FetchCodesArgs {
+  token: string | null;
+  customerId: string | number | null;
+}
+
 const initialState: CodeState = {
   codes: [],
   filteredCodes: [],
@@ -52,15 +57,16 @@ const fallbackCodes: Code[] = [
 ];
 
 export const fetchCodesThunk = createAsyncThunk<
-  Code[],
-  string | null,
-  { rejectValue: string }
->("codes/fetchCodes", async (token, { rejectWithValue }) => {
+  Code[],                    // Returned type
+  FetchCodesArgs,           // ThunkArg type
+  { rejectValue: string }   // ThunkApiConfig
+>('fetchCodes', async ({ token, customerId }, { rejectWithValue }) => {
   try {
-    const data = await fetchCodes(token);
-    return data;
+    const data = await fetchCodes(token, customerId);
+    // Ensure the data matches Code[] (optional type assertion if needed)
+    return data as Code[];
   } catch (error) {
-    console.error("Error in fetchCodesThunk:", error); // Fix typo
+    console.error("Error in fetchCodesThunk:", error);
     if (error instanceof Error) {
       return rejectWithValue(error.message);
     }
@@ -75,13 +81,13 @@ const codesSlice = createSlice({
     setSearchTerm: (state, action: { payload: string }) => {
       state.searchTerm = action.payload;
       state.filteredCodes = state.codes.filter((code) =>
-        code.code.toLowerCase().includes(action.payload.toLowerCase()),
+        code.code.toLowerCase().includes(action.payload.toLowerCase())
       );
       if (state.statusFilter !== "all") {
         state.filteredCodes = state.filteredCodes.filter(
           (code) =>
             (state.statusFilter === "assigned" && code.status === "assigned") ||
-            (state.statusFilter === "unassigned" && !code.status),
+            (state.statusFilter === "unassigned" && !code.status)
         );
       }
       state.currentPage = 1;
@@ -89,13 +95,13 @@ const codesSlice = createSlice({
     setStatusFilter: (state, action: { payload: string }) => {
       state.statusFilter = action.payload;
       state.filteredCodes = state.codes.filter((code) =>
-        code.code.toLowerCase().includes(state.searchTerm.toLowerCase()),
+        code.code.toLowerCase().includes(state.searchTerm.toLowerCase())
       );
       if (action.payload !== "all") {
         state.filteredCodes = state.filteredCodes.filter(
           (code) =>
             (action.payload === "assigned" && code.status === "assigned") ||
-            (action.payload === "unassigned" && !code.status),
+            (action.payload === "unassigned" && !code.status)
         );
       }
       state.currentPage = 1;
@@ -124,7 +130,7 @@ const codesSlice = createSlice({
           : fallbackCodes;
         if (state.searchTerm) {
           state.filteredCodes = state.filteredCodes.filter((code) =>
-            code.code.toLowerCase().includes(state.searchTerm.toLowerCase()),
+            code.code.toLowerCase().includes(state.searchTerm.toLowerCase())
           );
         }
         if (state.statusFilter !== "all") {
@@ -132,7 +138,7 @@ const codesSlice = createSlice({
             (code) =>
               (state.statusFilter === "assigned" &&
                 code.status === "assigned") ||
-              (state.statusFilter === "unassigned" && !code.status),
+              (state.statusFilter === "unassigned" && !code.status)
           );
         }
       })
