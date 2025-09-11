@@ -42,7 +42,7 @@ export function SearchFilter({
             >
               <option value="all">All Status</option>
               <option value="active">Active</option>
-              {/* <option value="pending">Pending</option> */}
+              <option value="pending">Pending</option>
               <option value="inactive">Inactive</option>
             </select>
           </div>

@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import type { PayloadAction } from "@reduxjs/toolkit"; // Use type-only import
 import { fetchCustomers } from "../../components/api/api";
 import type { Customer } from "../../types";
 
@@ -46,7 +47,7 @@ const customersSlice = createSlice({
   name: "customers",
   initialState,
   reducers: {
-    setSearchTerm: (state, action: { payload: string }) => {
+    setSearchTerm: (state, action: PayloadAction<string>) => {
       state.searchTerm = action.payload.toLowerCase();
       state.currentPage = 1;
       state.filteredCustomers = state.customers.filter((customer) => {
@@ -60,7 +61,7 @@ const customersSlice = createSlice({
         return matchesSearch && matchesStatus;
       });
     },
-    setStatusFilter: (state, action: { payload: string }) => {
+    setStatusFilter: (state, action: PayloadAction<string>) => {
       state.statusFilter = action.payload.toLowerCase();
       state.currentPage = 1;
       state.filteredCustomers = state.customers.filter((customer) => {
@@ -74,7 +75,7 @@ const customersSlice = createSlice({
         return matchesSearch && matchesStatus;
       });
     },
-    setCurrentPage: (state, action: { payload: number }) => {
+    setCurrentPage: (state, action: PayloadAction<number>) => {
       state.currentPage = action.payload;
     },
     resetSearch: (state) => {
@@ -83,6 +84,30 @@ const customersSlice = createSlice({
       state.filteredCustomers = state.customers;
       state.currentPage = 1;
     },
+    updateCustomerCodes: (
+      state,
+      action: PayloadAction<{ customerId: string; newCodes: number }>
+    ) => {
+      const { customerId, newCodes } = action.payload;
+      const customer = state.customers.find(
+        (c) => c.customer_id.toString() === customerId
+      );
+      if (customer) {
+        customer.codes_available += newCodes;
+        customer.total_codes_ordered += newCodes;
+      }
+      // Update filteredCustomers to reflect the change
+      state.filteredCustomers = state.customers.filter((customer) => {
+        const matchesSearch =
+          customer.name.toLowerCase().includes(state.searchTerm) ||
+          customer.customer_id.toString().toLowerCase().includes(state.searchTerm) ||
+          (customer.organization_name?.toLowerCase() || "").includes(state.searchTerm);
+        const matchesStatus =
+          state.statusFilter === "all" ||
+          customer.customer_status.toLowerCase() === state.statusFilter.toLowerCase();
+        return matchesSearch && matchesStatus;
+      });
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -90,7 +115,7 @@ const customersSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchCustomersThunk.fulfilled, (state, action:{payload:Customer[]}) => {
+      .addCase(fetchCustomersThunk.fulfilled, (state, action: PayloadAction<Customer[]>) => {
         state.loading = false;
         state.customers = action.payload;
         state.filteredCustomers = action.payload.filter((customer) => {
@@ -104,7 +129,7 @@ const customersSlice = createSlice({
           return matchesSearch && matchesStatus;
         });
       })
-      .addCase(fetchCustomersThunk.rejected, (state, action: {payload:string | undefined}) => {
+      .addCase(fetchCustomersThunk.rejected, (state, action: PayloadAction<string | undefined>) => {
         state.loading = false;
         state.error = action.payload || "Unable to fetch data. Using fallback data.";
         state.customers = [];
@@ -113,6 +138,6 @@ const customersSlice = createSlice({
   },
 });
 
-export const { setSearchTerm, setStatusFilter, setCurrentPage, resetSearch } =
+export const { setSearchTerm, setStatusFilter, setCurrentPage, resetSearch, updateCustomerCodes } =
   customersSlice.actions;
 export default customersSlice.reducer;

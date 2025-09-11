@@ -2,6 +2,8 @@ import { FaUsers, FaCheckCircle, FaClock, FaKey } from "react-icons/fa";
 import type { Customer } from "../../../types";
 
 export function CustomerCards({ customers }: { customers: Customer[] }) {
+  console.log("Rendering CustomerCards with customers:", customers);
+  
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
       <div className="bg-white rounded-lg shadow p-6">
@@ -21,7 +23,7 @@ export function CustomerCards({ customers }: { customers: Customer[] }) {
           <div className="ml-4">
             <p className="text-sm font-medium text-gray-500">Active</p>
             <p className="text-2xl font-bold text-gray-900">
-              {customers.filter((c) => c.status === "active").length}
+              {customers.filter((c) => c.customer_status === "active").length}
             </p>
           </div>
         </div>
@@ -32,7 +34,7 @@ export function CustomerCards({ customers }: { customers: Customer[] }) {
           <div className="ml-4">
             <p className="text-sm font-medium text-gray-500">Pending</p>
             <p className="text-2xl font-bold text-gray-900">
-              {customers.filter((c) => c.status === "pending").length}
+              {customers.filter((c) => c.customer_status === "pending").length}
             </p>
           </div>
         </div>

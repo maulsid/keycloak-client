@@ -30,6 +30,7 @@ interface ApiResponse {
   failed?: { error: string }[];
   // Add other properties as needed
 }
+
 // SMSPreview component
 const SMSPreview: React.FC<{ customerName: string; quantity: number }> = ({
   customerName,
@@ -57,9 +58,9 @@ export default function ProvisionCodes() {
 
   const dispatch = useDispatch();
   const { token } = useAuth();
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   const { customers, loading, error: fetchError } = useSelector(
-    (state: RootState) => state.customers,
+    (state: RootState) => state.customers
   );
 
   // Fetch customers when component mounts or token changes
@@ -98,11 +99,11 @@ export default function ProvisionCodes() {
     (customer) =>
       customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       customer.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.primaryContact.toLowerCase().includes(searchTerm.toLowerCase()),
+      customer.primaryContact.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const selectedCustomerData = transformedCustomers.find(
-    (c) => c.id === selectedCustomer,
+    (c) => c.id === selectedCustomer
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -152,26 +153,37 @@ export default function ProvisionCodes() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(payload),
-        },
+        }
       );
 
-      // Parse the response body
       const responseData: ApiResponse = await response.json();
 
       if (!response.ok) {
         console.log("Error response data:", responseData);
-      }
-      
-      // Check for failed property in response body
-      if (responseData.failed && responseData.failed.length > 0) {
-        setError(responseData.failed[0].error);
+        if (responseData.failed && responseData.failed.length > 0) {
+          setError(responseData.failed[0].error);
+        } else {
+          setError("Failed to provision codes");
+        }
         setIsLoading(false);
         return;
       }
 
+      // Update Redux store with new codes
+      dispatch({
+        type: "customers/updateCustomerCodes",
+        payload: {
+          customerId: selectedCustomer,
+          newCodes: quantity,
+        },
+      });
+
       // Success
       setSuccess(true);
-      setSelectedCustomer("");
+      setIsLoading(false);
+      // Do NOT reset selectedCustomer to keep selectedCustomerData available
+      // setSelectedCustomer("");
+      // Reset quantity to allow new input after success
       setQuantity(quantity);
 
     } catch (err) {
@@ -185,22 +197,22 @@ export default function ProvisionCodes() {
     return <Loading />;
   }
 
-  if (fetchError || error) { 
-    return ( 
+  if (fetchError || error) {
+    return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center"> 
+        <div className="text-center">
           <LuTriangleAlert className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">{error || fetchError}</h2>
-          <p className="text-gray-600">{error || fetchError}</p> 
-            <span
-            onClick={()=>navigate('/admin/dashboard')}
+          <p className="text-gray-600">{error || fetchError}</p>
+          <span
+            onClick={() => navigate('/admin/dashboard')}
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
           >
             Back to Dashboard
           </span>
-        </div> 
-      </div> 
-    ); 
+        </div>
+      </div>
+    );
   }
 
   if (success) {
@@ -213,7 +225,7 @@ export default function ProvisionCodes() {
           </h2>
           <p className="text-gray-600 mb-4">
             {quantity} access codes have been added to{" "}
-            {selectedCustomerData?.name}.
+            {selectedCustomerData?.name || "the selected customer"}.
           </p>
           <div className="bg-green-50 border border-green-200 rounded-md p-4 mb-6">
             <p className="text-sm text-green-800">
@@ -224,12 +236,24 @@ export default function ProvisionCodes() {
               codes
             </p>
           </div>
-          <span
-            onClick={()=>navigate('/admin/dashboard')}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-          >
-            Back to Dashboard
-          </span>
+          <div className="flex justify-center space-x-4">
+            <span
+              onClick={() => navigate('/admin/dashboard')}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+            >
+              Back to Dashboard
+            </span>
+            <button
+              onClick={() => {
+                setSuccess(false);
+                setSelectedCustomer("");
+                setQuantity(0);
+              }}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
+            >
+              Provision More Codes
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -259,12 +283,12 @@ export default function ProvisionCodes() {
                 <div className="flex">
                   <FaExclamationTriangle className="h-5 w-5 text-red-600 mr-2" />
                   <p className="text-sm text-red-800">{error}</p>
-                   <span
-            onClick={() => navigate('/admin/dashboard')}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-          >
-            Back to Dashboard
-          </span>
+                  <span
+                    onClick={() => navigate('/admin/dashboard')}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 ml-auto"
+                  >
+                    Back to Dashboard
+                  </span>
                 </div>
               </div>
             )}
@@ -384,7 +408,7 @@ export default function ProvisionCodes() {
             )}
             <div className="flex items-center justify-between pt-6">
               <span
-            onClick={() => navigate('/admin/dashboard')}
+                onClick={() => navigate('/admin/dashboard')}
                 className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
               >
                 Cancel
