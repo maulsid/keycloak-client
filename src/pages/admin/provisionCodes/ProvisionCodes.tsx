@@ -172,7 +172,7 @@ export default function ProvisionCodes() {
       // Success
       setSuccess(true);
       setSelectedCustomer("");
-      setQuantity(0);
+      setQuantity(quantity);
 
     } catch (err) {
       console.error("Error:", err);
