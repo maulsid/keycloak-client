@@ -1,6 +1,5 @@
 import type { AccessCodeFilterBarProps } from "../../../types";
 
-// Filter Bar Component
 const AceesCodeFilterBar: React.FC<AccessCodeFilterBarProps> = ({
   searchTerm,
   setSearchTerm,
@@ -56,8 +55,9 @@ const AceesCodeFilterBar: React.FC<AccessCodeFilterBarProps> = ({
             className="border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="all">All Status</option>
-            <option value="assigned">Available</option>
-            <option value="utilized">Utilized</option>
+             <option value="unassigned">Available</option>
+            <option value="assigned">utilized</option>
+           
           </select>
         </div>
       </div>

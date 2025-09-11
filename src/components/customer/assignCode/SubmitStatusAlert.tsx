@@ -22,7 +22,7 @@ const SubmitStatusAlert: React.FC<SubmitStatusAlertProps> = ({
             <h3 className="text-sm font-medium text-green-800">
               Access Code Assigned Successfully!
             </h3>
-            <div className="mt-2 text-sm text-green-700">
+            {/* <div className="mt-2 text-sm text-green-700">
               <p><strong>Patient:</strong> {formData.patientFirstName}</p>
               <p><strong>Mobile:</strong> {formData.patientMobile}</p>
               <p>
@@ -32,7 +32,7 @@ const SubmitStatusAlert: React.FC<SubmitStatusAlertProps> = ({
               <p className="mt-2">
                 An SMS message has been sent to the patient with their access code.
               </p>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
