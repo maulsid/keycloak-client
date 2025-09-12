@@ -1,5 +1,5 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit"; // Use type-only import
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { fetchCustomers } from "../../components/api/api";
 import type { Customer } from "../../types";
 

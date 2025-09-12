@@ -1,18 +1,18 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
-  FaKey,
   FaCheckCircle,
   FaExclamationTriangle,
+  FaKey,
   FaSearch,
 } from "react-icons/fa";
-import { useDispatch, useSelector } from "react-redux";
-import { Loading } from "../../../components/common/Loading";
-import Header from "../../../components/common/Header";
-import { fetchCustomersThunk } from "../../../redux/slices/customerSlice";
-import { useAuth } from "../../../context/CognitoAuth";
-import type { RootState } from "../../../redux/store";
 import { LuTriangleAlert } from "react-icons/lu";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import Header from "../../../components/common/Header";
+import { Loading } from "../../../components/common/Loading";
+import { useAuth } from "../../../context/CognitoAuth";
+import { fetchCustomersThunk } from "../../../redux/slices/customerSlice";
+import type { RootState } from "../../../redux/store";
 
 // Define the shape of customer data
 interface Customer {
@@ -28,10 +28,6 @@ interface Customer {
 }
 interface ApiResponse {
   failed?: { error: string }[];
-  processed?: {
-    customer_name: string;
-    processed_count: number;
-  }[];
   // Add other properties as needed
 }
 
@@ -63,9 +59,11 @@ export default function ProvisionCodes() {
   const dispatch = useDispatch();
   const { token } = useAuth();
   const navigate = useNavigate();
-  const { customers, loading, error: fetchError } = useSelector(
-    (state: RootState) => state.customers
-  );
+  const {
+    customers,
+    loading,
+    error: fetchError,
+  } = useSelector((state: RootState) => state.customers);
 
   // Fetch customers when component mounts or token changes
   useEffect(() => {
@@ -110,76 +108,67 @@ export default function ProvisionCodes() {
     (c) => c.id === selectedCustomer
   );
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsLoading(true);
-  setError("");
-  try {
-    // Validate form
-    if (!selectedCustomer) {
-      setError("Please select a customer");
-      setIsLoading(false);
-      return;
-    }
-    if (quantity <= 0 || quantity > 1000) {
-      setError("Please enter a valid quantity (1-1000)");
-      setIsLoading(false);
-      return;
-    }
-
-    // Prepare API payload
-    const payload = [
-      {
-        idempotency_key: `order-${new Date().toISOString()}-cust${selectedCustomer}`,
-        customer: {
-          id: parseInt(selectedCustomer),
-          create: false,
-          customer_type: "B2B",
-          address: selectedCustomerData?.organizationAddress || "123 Main St, Denver CO",
-          status: "active",
-        },
-        order: {
-          dispense_type: "self_dispense",
-          order_received_date: new Date().toISOString().split("T")[0],
-          codes_send_date: null,
-          number_of_codes: quantity,
-        },
-      },
-    ];
-
-    // Make API call
-    const response = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL}portal/admin/orders`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+    try {
+      // Validate form
+      if (!selectedCustomer) {
+        setError("Please select a customer");
+        setIsLoading(false);
+        return;
       }
-    );
+      if (quantity <= 0 || quantity > 1000) {
+        setError("Please enter a valid quantity (1-1000)");
+        setIsLoading(false);
+        return;
+      }
 
-    const responseData: ApiResponse = await response.json();
+      // Prepare API payload
+      const payload = [
+        {
+          idempotency_key: `order-${new Date().toISOString()}-cust${selectedCustomer}`,
+          customer: {
+            id: parseInt(selectedCustomer),
+            create: false,
+            customer_type: "B2B",
+            address:
+              selectedCustomerData?.organizationAddress ||
+              "123 Main St, Denver CO",
+            status: "active",
+          },
+          order: {
+            dispense_type: "self_dispense",
+            order_received_date: new Date().toISOString().split("T")[0],
+            codes_send_date: null,
+            number_of_codes: quantity,
+          },
+        },
+      ];
 
-    if (!response.ok || (responseData.failed && responseData.failed.length > 0)) {
-      console.log("Error response data:", responseData);
-      setError(
-        responseData.failed && responseData.failed.length > 0
-          ? responseData.failed[0].error
-          : "Failed to provision codes"
+      // Make API call
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}portal/admin/orders`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        }
       );
-      setIsLoading(false);
-      return;
-    }
 
-    // Map successful response
-    const processedOrder = responseData.processed?.[0];
-    if (processedOrder) {
-      // Verify customer name matches
-      if (processedOrder.customer_name !== selectedCustomerData?.name) {
-        console.warn("Customer name mismatch in API response");
-        setError("Customer name in response does not match selected customer");
+      const responseData: ApiResponse = await response.json();
+
+      if (!response.ok) {
+        console.log("Error response data:", responseData);
+        if (responseData.failed && responseData.failed.length > 0) {
+          setError(responseData.failed[0].error);
+        } else {
+          setError("Failed to provision codes");
+        }
         setIsLoading(false);
         return;
       }
@@ -189,24 +178,23 @@ const handleSubmit = async (e: React.FormEvent) => {
         type: "customers/updateCustomerCodes",
         payload: {
           customerId: selectedCustomer,
-          newCodes: processedOrder.processed_count, // Use processed_count from API
+          newCodes: quantity,
         },
       });
 
-      // Set quantity from API response to ensure consistency
-      setQuantity(processedOrder.processed_count);
+      // Success
       setSuccess(true);
       setIsLoading(false);
-    } else {
-      setError("No processed orders found in response");
+      // Do NOT reset selectedCustomer to keep selectedCustomerData available
+      // setSelectedCustomer("");
+      // Reset quantity to allow new input after success
+      setQuantity(quantity);
+    } catch (err) {
+      console.error("Error:", err);
+      setError("An unexpected error occurred");
       setIsLoading(false);
     }
-  } catch (err) {
-    console.error("Error:", err);
-    setError("An unexpected error occurred");
-    setIsLoading(false);
-  }
-};
+  };
 
   if (loading) {
     return <Loading />;
@@ -217,10 +205,12 @@ const handleSubmit = async (e: React.FormEvent) => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <LuTriangleAlert className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">{error || fetchError}</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            {error || fetchError}
+          </h2>
           <p className="text-gray-600">{error || fetchError}</p>
           <span
-            onClick={() => navigate('/admin/dashboard')}
+            onClick={() => navigate("/admin/dashboard")}
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
           >
             Back to Dashboard
@@ -253,7 +243,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           </div>
           <div className="flex justify-center space-x-4">
             <span
-              onClick={() => navigate('/admin/dashboard')}
+              onClick={() => navigate("/admin/dashboard")}
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
             >
               Back to Dashboard
@@ -299,7 +289,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                   <FaExclamationTriangle className="h-5 w-5 text-red-600 mr-2" />
                   <p className="text-sm text-red-800">{error}</p>
                   <span
-                    onClick={() => navigate('/admin/dashboard')}
+                    onClick={() => navigate("/admin/dashboard")}
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 ml-auto"
                   >
                     Back to Dashboard
@@ -423,7 +413,7 @@ const handleSubmit = async (e: React.FormEvent) => {
             )}
             <div className="flex items-center justify-between pt-6">
               <span
-                onClick={() => navigate('/admin/dashboard')}
+                onClick={() => navigate("/admin/dashboard")}
                 className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
               >
                 Cancel

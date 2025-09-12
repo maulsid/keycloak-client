@@ -1,15 +1,15 @@
-import type { CustomerData } from "../../types";
+import type { IconType } from "react-icons";
 import {
-  HiIdentification,
   HiCheckCircle,
+  HiDocumentReport,
   HiExclamationCircle,
-  HiShoppingCart,
+  HiIdentification,
   HiKey,
   HiPlusCircle,
+  HiShoppingCart,
   HiSpeakerphone,
-  HiDocumentReport,
 } from "react-icons/hi";
-import type { IconType } from "react-icons";
+import type { CustomerData } from "../../types";
 
 export interface StatCard {
   title: string;
@@ -35,19 +35,19 @@ export const statCards: StatCard[] = [
   },
   {
     title: "Available Codes",
-    value: (customerData) => customerData.availableCodes,
+    value: (customerData) => customerData.availableCodesCount,
     icon: HiCheckCircle,
     iconColor: "text-cyan-500",
   },
   {
     title: "Utilized Codes",
-    value: (customerData) => customerData.utilizedCodes,
+    value: (customerData) => customerData.utilizedCodesCount,
     icon: HiExclamationCircle,
     iconColor: "text-blue-500",
   },
   {
     title: "Total Purchased",
-    value: (customerData) => customerData.purchasedCodes,
+    value: (customerData) => customerData.totalPurchasedCodes,
     icon: HiShoppingCart,
     iconColor: "text-orange-500",
   },

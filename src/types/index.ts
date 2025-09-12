@@ -252,3 +252,11 @@ export interface VerifyInviteResponse {
   status: string;
 }
 
+export interface CreateInviteExistingPayload {
+  customer_id: number;
+  organization_id: number;
+  email: string;
+  role_id: number;     // we'll pass ADMIN role id from UI or env
+  ttl_days?: number;   // default 14 if omitted
+}
+

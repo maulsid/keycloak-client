@@ -15,6 +15,7 @@ interface AuthContextType {
   token: string | null; // access_token
   refreshToken: string | null;
   idToken: string | null;
+  orgId: string | null;
   customerId: string | null;
   login: () => Promise<void>;
   logout: () => void;
@@ -82,12 +83,31 @@ const decodeCustomerIdFromToken = (idToken: string | null): string | null => {
   }
 };
 
+// Robust base64url → JSON parse for JWT payload
+const parseIdTokenPayload = (idToken: string | null): any | null => {
+  if (!idToken) return null;
+  const parts = idToken.split(".");
+  if (parts.length !== 3) return null;
+  try {
+    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    // atob expects padded string
+    const padded = base64 + "=".repeat((4 - (base64.length % 4)) % 4);
+    const json = atob(padded);
+    return JSON.parse(json);
+  } catch (e) {
+    console.error("Failed to parse idToken payload:", e);
+    return null;
+  }
+};
+
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [token, setToken] = useState<string | null>(null); // access_token
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [idToken, setIdToken] = useState<string | null>(null);
   const [customerId, setCustomerId] = useState<string | null>(null);
+  const [orgId, setOrgId] = useState<string | null>(null);
 
   useEffect(() => {
     // Handle logout redirect
@@ -152,7 +172,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           if (!decodedCustomerId) {
             console.warn("No customerId found in id_token");
           }
+          
           setCustomerId(decodedCustomerId);
+          const payload = parseIdTokenPayload(data.id_token);
+          if (!payload?.org_id) {
+            console.warn("No org_id found in id_token");
+          }
+          setOrgId(payload?.org_id || null);
 
           // Clear query parameters
           window.history.replaceState({}, document.title, window.location.pathname);
@@ -203,6 +229,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           if (!decodedCustomerId) {
             console.warn("No customerId found in id_token after refresh");
           }
+          const payload = parseIdTokenPayload(data.id_token);
+          if (!payload?.org_id) {
+            console.warn("No payload found in id_token after refresh");
+          }
+          setOrgId(payload?.org_id || null);
           setCustomerId(decodedCustomerId);
         } catch (err: unknown) {
           console.error("Token refresh error:", err);
@@ -263,7 +294,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, token, refreshToken, idToken, customerId, login, logout, signup }}
+      value={{ isAuthenticated, token, refreshToken, idToken, customerId, orgId, login, logout, signup }}
     >
       {children}
     </AuthContext.Provider>

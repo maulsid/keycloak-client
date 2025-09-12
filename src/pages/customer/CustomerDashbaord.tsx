@@ -1,25 +1,25 @@
-import { useState, useEffect } from "react";
-import CustomerStatCard from "../../components/customer/CustomerStatsCard";
-import type { CustomerData } from "../../types";
-import CustomerInfo from "../../components/customer/CustomerInfo";
-import CustomerActionCard from "../../components/customer/CustomerActionCard";
-import CustomerActivityItem from "../../components/customer/CustomerActivityItem";
-import { actionCards, statCards } from "../../utils/data/CutomerDashbaordData";
+import { useEffect, useState } from "react";
+import { Error } from "../../components/common/Error";
 import Header from "../../components/common/Header";
 import { Loading } from "../../components/common/Loading";
-import { Error } from "../../components/common/Error";
+import CustomerActionCard from "../../components/customer/CustomerActionCard";
+import CustomerActivityItem from "../../components/customer/CustomerActivityItem";
 import CustomerFooter from "../../components/customer/CustomerFooter";
+import CustomerInfo from "../../components/customer/CustomerInfo";
+import CustomerStatCard from "../../components/customer/CustomerStatsCard";
 import { useAuth } from "../../context/CognitoAuth";
+import type { CustomerData } from "../../types";
+import { actionCards, statCards } from "../../utils/data/CutomerDashbaordData";
 
 // Define user outside the component to ensure a stable reference
-const user = {
-  id: "001",
-  companyName: "Medical Center",
-  firstName: "John",
-  lastName: "Doe",
-  email: "john.doe@medicalcenter.com",
-  phoneNumber: "555-123-4567",
-};
+// const user = {
+//   id: "001",
+//   companyName: "Medical Center",
+//   firstName: "John",
+//   lastName: "Doe",
+//   email: "john.doe@medicalcenter.com",
+//   phoneNumber: "555-123-4567",
+// };
 
 // Main CustomerDashboard Component
 const CustomerDashboard: React.FC = () => {
@@ -30,64 +30,97 @@ const CustomerDashboard: React.FC = () => {
 
   const { customerId, token } = useAuth(); // Access auth details
   console.log("ava", availableCodes);
-useEffect(() => {
-  const fetchCustomerData = async () => {
-    try {
-      setLoading(true);
+  useEffect(() => {
+    const fetchCustomerData = async () => {
+      try {
+        setLoading(true);
 
-      const statsResponse = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}portal/hcp/customers/${customerId}/stats`,
-        { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
-      );
-      const statsData = await statsResponse.json();
+        const statsResponse = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL}portal/hcp/customers/${customerId}/stats`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const statsData = await statsResponse.json();
 
-      if (!statsResponse.ok) console.log("statsResponse", statsResponse);
+        if (!statsResponse.ok) console.log("statsResponse", statsResponse);
 
-      const codesResponse = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}portal/hcp/customers/${customerId}/profile`,
-        { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
-      );
-      const codesData = await codesResponse.json();
+        const codesResponse = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL}portal/hcp/customers/${customerId}/profile`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const codesData = await codesResponse.json();
 
-      if (!codesResponse.ok) console.log("codesResponse", codesResponse);
+        if (!codesResponse.ok) console.log("codesResponse", codesResponse);
 
-      const mappedStats = {
-        availableCodesCount: statsData.codes_available || 0,
-        utilizedCodesCount: statsData.codes_utilized || 0,
-        totalPurchasedCodes: statsData.total_codes_purchased || 0,
-        purchasedCodes: statsData.total_codes_purchased ? Array(statsData.total_codes_purchased).fill(null) : [],
-        utilizedCodes: statsData.codes_utilized ? Array(statsData.codes_utilized).fill(null) : [],
-        availableCodes: [], // Adjust if codes come from a different endpoint
-      };
+        const mappedStats = {
+          availableCodesCount: statsData.codes_available || 0,
+          utilizedCodesCount: statsData.codes_utilized || 0,
+          totalPurchasedCodes: statsData.total_codes_purchased || 0,
+          purchasedCodes: statsData.total_codes_purchased
+            ? Array(statsData.total_codes_purchased).fill(null)
+            : [],
+          utilizedCodes: statsData.codes_utilized
+            ? Array(statsData.codes_utilized).fill(null)
+            : [],
+          availableCodes: [], // Adjust if codes come from a different endpoint
+        };
 
-      setCustomerData({
-        customerId: `CUST-${customerId}`,
-        name: codesData.organization_name || user.companyName,
-        primaryContact: `${codesData.customer_contacts[0]?.first_name || user.firstName} ${codesData.customer_contacts[0]?.last_name || user.lastName}`,
-        email: codesData.customer_contacts[0]?.email || user.email,
-        phone: codesData.customer_contacts[0]?.phone_number || user.phoneNumber,
-        ...mappedStats,
-        recentActivity: [
-          { id: 1, action: "New access code requested", patientId: "PAT-001", date: "2024-01-15", status: "completed" },
-          { id: 2, action: "Patient report viewed", patientId: "PAT-002", date: "2024-01-14", status: "completed" },
-          { id: 3, action: "Marketing materials downloaded", patientId: undefined, date: "2024-01-13", status: "completed" },
-        ],
-      });
-      setAvailableCodes(mappedStats.availableCodes);
-    } catch (err) {
-      console.error("Error fetching data:", err);
-      setError("Failed to load customer data or available codes");
-    } finally {
+        setCustomerData({
+          customerId: `CUST-${customerId}`,
+          name: codesData.organization_name || "--",
+          primaryContact: `${codesData.customer_contacts[0]?.first_name || codesData.customer_contacts[0]?.last_name ? codesData.customer_contacts[0]?.first_name + codesData.customer_contacts[0]?.last_name : "--"}`,
+          email: codesData.customer_contacts[0]?.email || "--",
+          phone: codesData.customer_contacts[0]?.phone_number || "--",
+          ...mappedStats,
+          recentActivity: [
+            // {
+            //   id: 1,
+            //   action: "New access code requested",
+            //   patientId: "PAT-001",
+            //   date: "2024-01-15",
+            //   status: "completed",
+            // },
+            // {
+            //   id: 2,
+            //   action: "Patient report viewed",
+            //   patientId: "PAT-002",
+            //   date: "2024-01-14",
+            //   status: "completed",
+            // },
+            // {
+            //   id: 3,
+            //   action: "Marketing materials downloaded",
+            //   patientId: undefined,
+            //   date: "2024-01-13",
+            //   status: "completed",
+            // },
+          ],
+        });
+        setAvailableCodes(mappedStats.availableCodes);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError("Failed to load customer data or available codes");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (customerId && token) fetchCustomerData();
+    else {
       setLoading(false);
+      setError("Unable to retrieve customer ID or token");
     }
-  };
-
-  if (customerId && token) fetchCustomerData();
-  else {
-    setLoading(false);
-    setError("Unable to retrieve customer ID or token");
-  }
-}, [customerId, token]);
+  }, [customerId, token]);
+  console.log(customerData);
   if (loading) {
     return <Loading />;
   }

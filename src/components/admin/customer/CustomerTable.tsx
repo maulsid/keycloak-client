@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
-import { FaEye, FaEdit, FaKey, FaUserPlus } from "react-icons/fa";
+import { FaEdit, FaEye, FaKey, FaUserPlus } from "react-icons/fa";
+import { Link, useNavigate } from "react-router-dom";
 import type { Customer } from "../../../types";
 import { truncateUserId } from "../../../utils/helper/helper";
 
@@ -18,6 +18,7 @@ export function CustomerTable({
   onView,
   onEdit,
 }: CustomerTableProps) {
+  const navigate = useNavigate();
   return (
     <div className="bg-white rounded-lg shadow">
       <div className="px-6 py-4 border-b border-gray-200">
@@ -76,24 +77,39 @@ export function CustomerTable({
                 </td> */}
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div>
-                    <div className="text-sm text-gray-900">{customer.customer_contacts && customer.customer_contacts[0]?.phone_number !== undefined ? `phone:${customer.customer_contacts[0]?.phone_number}` : ''}</div>
+                    <div className="text-sm text-gray-900">
+                      {customer.customer_contacts &&
+                      customer.customer_contacts[0]?.phone_number !== undefined
+                        ? `phone:${customer.customer_contacts[0]?.phone_number}`
+                        : ""}
+                    </div>
                     <div className="flex items-center text-sm text-gray-500 relative group">
-                      <span className="truncate cursor-pointer ">{truncateUserId(customer.customer_contacts && customer.customer_contacts[0]?.user_id)}</span>
-                      {customer.customer_contacts && customer.customer_contacts[0]?.user_id && (
-                        <div className="absolute hidden group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2 -top-8 left-0 z-10">
-                          {customer.customer_contacts && customer.customer_contacts[0]?.user_id}
-                        </div>
-                      )}
+                      <span className="truncate cursor-pointer ">
+                        {truncateUserId(
+                          customer.customer_contacts &&
+                            customer.customer_contacts[0]?.user_id
+                        )}
+                      </span>
+                      {customer.customer_contacts &&
+                        customer.customer_contacts[0]?.user_id && (
+                          <div className="absolute hidden group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2 -top-8 left-0 z-10">
+                            {customer.customer_contacts &&
+                              customer.customer_contacts[0]?.user_id}
+                          </div>
+                        )}
                     </div>
                     <div className="flex items-center text-sm text-gray-500">
-                      {customer.customer_contacts && customer.customer_contacts[0]?.email}
+                      {customer.customer_contacts &&
+                        customer.customer_contacts[0]?.email}
                     </div>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="space-y-2">
                     {getStatusBadge(customer.customer_status)}
-                    {getInvitationStatusBadge(customer.customer_status|| "Registered")}
+                    {getInvitationStatusBadge(
+                      customer.customer_status || "Registered"
+                    )}
                   </div>
                 </td>
                 <td>
@@ -108,21 +124,25 @@ export function CustomerTable({
                       {customer.codes_available} available
                     </div>
                     <div className="text-xs text-gray-500">
-                      {customer.codes_utilized} utilized / {customer.total_codes_ordered}{" "}
-                      total
+                      {customer.codes_utilized} utilized /{" "}
+                      {customer.total_codes_ordered} total
                     </div>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">
                     <div className="flex items-center">
-                      <span className="mr-1">📅</span> {customer.created_at
+                      <span className="mr-1">📅</span>{" "}
+                      {customer.created_at
                         ? new Date(customer.created_at).toLocaleDateString()
                         : "N/A"}
                     </div>
-                    <div className="text-xs text-gray-500">Registered: {customer.created_at
-                      ? new Date(customer.created_at).toLocaleDateString()
-                      : "N/A"}</div>
+                    <div className="text-xs text-gray-500">
+                      Registered:{" "}
+                      {customer.created_at
+                        ? new Date(customer.created_at).toLocaleDateString()
+                        : "N/A"}
+                    </div>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -141,13 +161,34 @@ export function CustomerTable({
                     >
                       <FaEdit className="h-5 w-5" />
                     </button>
-                    <Link
-                      to={`/admin/create-customer?organization_id=${customer.organization_id}&customer_id=${customer.customer_id}`}
-                      className="text-indigo-600 hover:text-indigo-900"
-                      title="Invite User"
-                    >
-                      <FaUserPlus className="h-5 w-5" />
-                    </Link>
+                    {/* --- NEW: Invite HCP (only when there is NO existing contact) --- */}
+                    {!(
+                      customer.customer_contacts &&
+                      customer.customer_contacts.length > 0
+                    ) ? (
+                      <button
+                        onClick={() =>
+                          navigate(
+                            `/admin/create-customer?organization_id=${customer.organization_id}&customer_id=${customer.customer_id}`
+                          )
+                        }
+                        className="text-teal-600 hover:text-teal-900"
+                        title="Invite User"
+                      >
+                        <FaUserPlus className="h-5 w-5" />
+                      </button>
+                    ) : (
+                      // Disabled visual (kept in UI for clarity) — optional: remove this block to hide it entirely
+                      <button
+                        disabled
+                        className="text-gray-300 cursor-not-allowed"
+                        title="Invite disabled: customer already has a contact"
+                        aria-disabled="true"
+                      >
+                        <FaUserPlus className="h-5 w-5" />
+                      </button>
+                    )}
+
                     <Link
                       to={`/admin/provision-codes?customer=${customer.customer_id}`}
                       className="text-purple-600 hover:text-purple-900"

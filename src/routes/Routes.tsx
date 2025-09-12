@@ -11,6 +11,8 @@ import CustomerDashboard from "../pages/customer/CustomerDashbaord";
 import Login from "../pages/login/Login";
 import NotFound from "../pages/notFound/NotFound";
 import InviteAcceptPage from "../pages/invite/InviteAcceptPage";
+import Settings from "../pages/admin/Settings/Settings";
+import InviteAdmin from "../pages/admin/Settings/InviteAdmin";
 
 const AppRoutes = () => {
   return (
@@ -33,6 +35,8 @@ const AppRoutes = () => {
         <Route path="/admin/customers" element={<AdminCustomers />} />
         <Route path="/admin/create-customer" element={<CreateCustomer />} />
         <Route path="/admin/provision-codes" element={<ProvisionCodes />} />
+        <Route path="/admin/settings" element={<Settings />} />
+        <Route path="/admin/settings/invite-admin" element={<InviteAdmin />} /> 
         {/*customer dashboard routes*/}
         <Route path="/customer/dashboard" element={<CustomerDashboard />} />
         <Route path="/customer/access-codes" element={<AccessCodes />} />

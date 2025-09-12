@@ -1,9 +1,9 @@
-import { FaUsers, FaCheckCircle, FaClock, FaKey } from "react-icons/fa";
+import { FaCheckCircle, FaClock, FaKey, FaUsers } from "react-icons/fa";
 import type { Customer } from "../../../types";
 
 export function CustomerCards({ customers }: { customers: Customer[] }) {
   console.log("Rendering CustomerCards with customers:", customers);
-  
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
       <div className="bg-white rounded-lg shadow p-6">

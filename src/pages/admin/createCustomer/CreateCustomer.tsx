@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
 import {
-  FaUser,
   FaCheckCircle,
-  FaExclamationTriangle,
   FaCopy,
+  FaExclamationTriangle,
+  FaUser,
 } from "react-icons/fa";
-import Header from "../../../components/common/Header";
-import { useAuth } from "../../../context/CognitoAuth";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
-  fetchCustomers,
   createInvitationExisting,
   createInvitationNew,
   createOrdersProvisionStyle,
+  fetchCustomers,
 } from "../../../components/api/api";
+import Header from "../../../components/common/Header";
+import { useAuth } from "../../../context/CognitoAuth";
 import type { Customer } from "../../../types";
 
 interface FormData {
@@ -31,6 +31,7 @@ interface FormData {
 export default function CreateCustomer() {
   const { token } = useAuth();
   const [sp] = useSearchParams();
+  const navigate = useNavigate();
 
   // Existing flow detection
   const qpOrgId = sp.get("organization_id");
@@ -53,7 +54,7 @@ export default function CreateCustomer() {
   // load/derive selected customer (existing mode)
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
-    null,
+    null
   );
 
   const [generatedInvitation, setGeneratedInvitation] = useState("");
@@ -169,12 +170,12 @@ export default function CreateCustomer() {
           // 1) Re-fetch customers to get the new customer's ID by name
           const freshCustomers = await fetchCustomers(token);
           const created = freshCustomers.find(
-            (c) => (c.name || "").trim() === formData.customerName.trim(),
+            (c) => (c.name || "").trim() === formData.customerName.trim()
           );
 
           if (!created) {
             throw new Error(
-              "Could not find the newly created customer to place the initial order.",
+              "Could not find the newly created customer to place the initial order."
             );
           }
 
@@ -199,7 +200,6 @@ export default function CreateCustomer() {
                   formData.organizationAddress ||
                   "N/A",
                 status: "active" as const,
-                
               },
               order: {
                 dispense_type: "self_dispense" as const,
@@ -214,12 +214,12 @@ export default function CreateCustomer() {
           await createOrdersProvisionStyle(token, payload);
 
           setOrderNote(
-            `Initial order of ${formData.initialAccessCodes} codes has been created.`,
+            `Initial order of ${formData.initialAccessCodes} codes has been created.`
           );
         } catch (orderErr: any) {
           console.error("initial order error:", orderErr);
           setOrderNote(
-            "Customer was created and invited, but initial order failed. You can provision codes later from the dashboard.",
+            "Customer was created and invited, but initial order failed. You can provision codes later from the dashboard."
           );
         }
       }
@@ -242,7 +242,9 @@ export default function CreateCustomer() {
         <div className="max-w-2xl w-full bg-white rounded-lg shadow-lg p-8">
           <FaCheckCircle className="mx-auto h-16 w-16 text-green-600 mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
-            {isExistingMode ? "Invitation Sent!" : "Customer Created Successfully!"}
+            {isExistingMode
+              ? "Invitation Sent!"
+              : "Customer Created Successfully!"}
           </h2>
           <p className="text-gray-600 mb-6 text-center">
             {isExistingMode
@@ -270,7 +272,8 @@ export default function CreateCustomer() {
               </button>
             </div>
             <p className="text-xs text-blue-600 mt-2">
-              Send this link to the user to allow them to register for the portal.
+              Send this link to the user to allow them to register for the
+              portal.
             </p>
           </div>
 
@@ -299,14 +302,16 @@ export default function CreateCustomer() {
               }}
               className="flex-1 inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
             >
-              {isExistingMode ? "Send Another Invite" : "Create Another Customer"}
+              {isExistingMode
+                ? "Send Another Invite"
+                : "Create Another Customer"}
             </button>
-            <a
-              href="/admin/dashboard"
+            <button
+              onClick={() => navigate("/admin/dashboard")}
               className="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
             >
               Back to Dashboard
-            </a>
+            </button>
           </div>
         </div>
       </div>
@@ -329,7 +334,9 @@ export default function CreateCustomer() {
         <div className="bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-medium text-gray-900">
-              {isExistingMode ? "Customer & Organization (Read-only)" : "Customer Information"}
+              {isExistingMode
+                ? "Customer & Organization (Read-only)"
+                : "Customer Information"}
             </h2>
             <p className="text-sm text-gray-500 mt-1">
               {isExistingMode
@@ -366,7 +373,10 @@ export default function CreateCustomer() {
                     placeholder="e.g., Acme Medical Center"
                     value={formData.organizationName}
                     onChange={(e) =>
-                      setFormData({ ...formData, organizationName: e.target.value })
+                      setFormData({
+                        ...formData,
+                        organizationName: e.target.value,
+                      })
                     }
                   />
                 </div>
@@ -382,7 +392,10 @@ export default function CreateCustomer() {
                     placeholder="Street, City, State, ZIP"
                     value={formData.organizationAddress}
                     onChange={(e) =>
-                      setFormData({ ...formData, organizationAddress: e.target.value })
+                      setFormData({
+                        ...formData,
+                        organizationAddress: e.target.value,
+                      })
                     }
                   />
                 </div>
@@ -490,7 +503,10 @@ export default function CreateCustomer() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                       value={formData.inviteTtlDays}
                       onChange={(e) =>
-                        setFormData({ ...formData, inviteTtlDays: Number(e.target.value) })
+                        setFormData({
+                          ...formData,
+                          inviteTtlDays: Number(e.target.value),
+                        })
                       }
                     />
                   </div>
@@ -563,9 +579,14 @@ export default function CreateCustomer() {
             </h3>
             <ul className="text-sm text-blue-800 space-y-1">
               <li>• A unique Customer will be created</li>
-              <li>• An invitation link will be created for the user to register</li>
+              <li>
+                • An invitation link will be created for the user to register
+              </li>
               <li>• A batch order will be created immediately</li>
-              <li>• You can provision additional codes later from the admin dashboard</li>
+              <li>
+                • You can provision additional codes later from the admin
+                dashboard
+              </li>
             </ul>
           </div>
         )}
