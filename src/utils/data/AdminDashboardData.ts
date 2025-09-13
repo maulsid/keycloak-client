@@ -36,8 +36,8 @@ export const statCards: StatCard[] = [
     color: "text-orange-500",
   },
   {
-    title: "Active Codes",
-    value: (adminData: AdminData) => adminData.totalAccessCodes,
+    title: "Total Codes",
+    value: (adminData: AdminData) => adminData.totalCodes,
     icon: ActiveCodesIcon,
     color: "text-cyan-500",
   },

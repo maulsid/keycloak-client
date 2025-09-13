@@ -8,57 +8,43 @@ import { actionCards, statCards } from "../../utils/data/AdminDashboardData";
 import Header from "../../components/common/Header";
 import { Loading } from "../../components/common/Loading";
 import { Error } from "../../components/common/Error";
+import { useAuth } from "../../context/CognitoAuth";
 
 // Main AdminDashboard Component
 const AdminDashboard: React.FC = () => {
   const [adminData, setAdminData] = useState<AdminData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { token } = useAuth(); // Access auth details
 
   useEffect(() => {
-    // Mock data since useAuth and apiService are removed
     const fetchAdminData = async () => {
       try {
         setLoading(true);
-        const mockData: AdminData = {
-          totalCustomers: 150,
-          activeCustomers: 120,
-          totalAccessCodes: 500,
-          utilizedCodes: 300,
-          availableCodes: 200,
-          pendingInvitations: 3,
-          recentActivity: [
-            {
-              id: 1,
-              action: "New customer created",
-              customerName: "City Medical Center",
-              date: "2024-01-15",
-              status: "completed",
-            },
-            {
-              id: 2,
-              action: "Access codes provisioned",
-              customerName: "Acme Medical Center",
-              date: "2024-01-14",
-              status: "completed",
-            },
-            {
-              id: 3,
-              action: "Customer invitation sent",
-              customerName: "Regional Hospital",
-              date: "2024-01-13",
-              status: "completed",
-            },
-            {
-              id: 4,
-              action: "Access codes provisioned",
-              customerName: "Community Clinic",
-              date: "2024-01-12",
-              status: "completed",
-            },
-          ],
-        };
-        setAdminData(mockData);
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}portal/admin/customers/stats`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+
+        if (!response.ok) {
+          console.log("errresponse", response);
+
+        }
+
+        const data = await response.json();
+        setAdminData({
+          totalCustomers: data.stats.total_customers || 0,
+          activeCustomers: data.stats.active_customers || 0,
+          totalAccessCodes: data.stats.total_codes || 0,
+          utilizedCodes: data.stats.total_codes_utilized || 0,
+          availableCodes: data.stats.total_codes_available || 0,
+          pendingInvitations: data.stats.pending_invitations || 0,
+          totalCodes: data.stats.total_codes_ordered || 0,
+          recentActivity: data.stats.recent_activity || [], // Adjust based on API response structure
+        });
       } catch (err) {
         console.error("Error fetching admin data:", err);
         setError("Failed to load admin data");
@@ -69,6 +55,7 @@ const AdminDashboard: React.FC = () => {
 
     fetchAdminData();
   }, []);
+
   if (loading) {
     return <Loading />;
   }

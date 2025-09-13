@@ -73,6 +73,7 @@ export interface AdminData {
   totalAccessCodes: number;
   utilizedCodes: number;
   availableCodes: number;
+  totalCodes: number;
   pendingInvitations: number;
   recentActivity: Array<{
     id: number;
